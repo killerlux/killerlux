@@ -1,7 +1,8 @@
 /* Local, dependency-free extraction. No network request, script execution or currency conversion. */
-const LIMITS = Object.freeze({bytes:5*1024*1024,depth:64,nodes:20000,products:100,offers:200});
+const LIMITS = Object.freeze({bytes:5*1024*1024,depth:64,nodes:20000,products:100,offers:200,htmlAttributes:256,jsonKey:256,jsonPath:1000,outputBytes:1_000_000});
 const CURRENCIES = new Set(typeof Intl.supportedValuesOf === 'function' ? Intl.supportedValuesOf('currency') : ['EUR','USD','GBP','CAD','CHF','AUD','JPY','CNY','AED','MAD','SAR']);
 const PRODUCT_TYPES = new Set(['Product','ProductGroup']);
+const AVAILABILITY = new Set(['BackOrder','Discontinued','InStock','InStoreOnly','LimitedAvailability','OnlineOnly','OutOfStock','PreOrder','PreSale','Reserved','SoldOut']);
 const typeNames = value => (Array.isArray(value) ? value : [value]).filter(v=>typeof v==='string').map(v=>v.split(/[\/#]/).pop());
 const isType = (value,type) => value && typeof value==='object' && typeNames(value['@type']).includes(type);
 const text = value => typeof value==='string' || typeof value==='number' ? String(value).trim().slice(0,2000) : null;
@@ -24,6 +25,12 @@ function cleanCurrency(value,warnings) {
   const s=String(value).trim().toUpperCase();
   if(!/^[A-Z]{3}$/.test(s) || !CURRENCIES.has(s)){warnings.push('Devise non reconnue ; aucune conversion effectuée.');return null;}
   return s;
+}
+function cleanAvailability(value,warnings) {
+  if(value===undefined||value===null)return null;
+  if(typeof value==='string'&&AVAILABILITY.has(value))return value;
+  try {const u=new URL(value);const state=u.pathname.split('/').pop();if(['http:','https:'].includes(u.protocol)&&['schema.org','www.schema.org'].includes(u.hostname)&&AVAILABILITY.has(state))return state;}catch{}
+  warnings.push('Disponibilité non standard ignorée ; sa valeur brute a été écartée des preuves.');return null;
 }
 function dateOrNull(value) {
   if(typeof value!=='string' || !/^\d{4}-\d{2}-\d{2}T/.test(value))return null;
@@ -56,7 +63,11 @@ function passiveDocument(html,warnings) {
     const attrs=Object.create(null);
     const attrText=token.slice(match[0].length);
     const attrPattern=/([^\s=\/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
-    let a;while((a=attrPattern.exec(attrText))){const key=a[1].toLowerCase();if(!(key in attrs))attrs[key]=decode(a[2]??a[3]??a[4]??'');}
+    let a,attributeCount=0;while((a=attrPattern.exec(attrText))){
+      if(++attributeCount>LIMITS.htmlAttributes){const message='Trop d’attributs HTML dans une balise ; extraction partielle.';if(!warnings.includes(message))warnings.push(message);break;}
+      const key=a[1].toLowerCase();if(key!=='type'&&!preserved.has(key))continue;
+      if(!(key in attrs))attrs[key]=decode(a[2]??a[3]??a[4]??'');
+    }
     if(tag==='script'||tag==='style'||tag==='textarea'||tag==='title') {
       const closePattern=new RegExp('</'+tag+'\\s*>','ig');closePattern.lastIndex=position;const close=closePattern.exec(html);
       const raw=html.slice(position,close?close.index:html.length);position=close?closePattern.lastIndex:html.length;
@@ -130,8 +141,9 @@ export async function extractOffers(input,options={}) {
   const source={url:sourceURL,canonicalUrl:safeSourceURL(records.canonical,sourceURL),captureTime:dateOrNull(options.captureTime||capture?.capturedAt),importTime,method:capture?'collector-import':typeof input==='string'&&(options.format==='html'||!/^\s*[\[{]/.test(input))?'imported-html':'imported-json',sha256:null,liveVerified:false};
   if(!source.captureTime)warnings.push('Date de capture inconnue ; la date d’import n’est pas une vérification en direct.');
   if(globalThis.crypto?.subtle){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(raw));source.sha256=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');}
-  const indexed=new Map(),nodes=[];let nodeCount=0,limitHit=false;
+  const indexed=new Map(),nodes=[];let nodeCount=0,limitHit=false,pathLimitHit=false;
   function walk(value,path,depth,method,parentGroup=null){
+    if(path.length>LIMITS.jsonPath-64){pathLimitHit=true;return;}
     if(depth>LIMITS.depth||++nodeCount>LIMITS.nodes){limitHit=true;return;}
     if(Array.isArray(value)){value.forEach((v,i)=>walk(v,path+'['+i+']',depth+1,method,parentGroup));return;}
     if(!safeObject(value))return;
@@ -139,16 +151,21 @@ export async function extractOffers(input,options={}) {
     const types=typeNames(value['@type']);
     if(types.some(t=>PRODUCT_TYPES.has(t)))nodes.push({value,path,method,parentGroup});
     const group=types.includes('ProductGroup')?value:parentGroup;
-    for(const [key,v] of Object.entries(value))if(key!=='@context'&&v&&typeof v==='object')walk(v,path+'.'+key,depth+1,method,key==='hasVariant'?group:parentGroup);
+    for(const [key,v] of Object.entries(value))if(key!=='@context'&&v&&typeof v==='object'){
+      if(key.length>LIMITS.jsonKey||path.length+key.length+1>LIMITS.jsonPath-64){pathLimitHit=true;continue;}
+      walk(v,path+'.'+key,depth+1,method,key==='hasVariant'?group:parentGroup);
+    }
   }
   records.forEach(r=>walk(r.value,r.path,0,r.method));
   if(limitHit)warnings.push('Limite de profondeur ou de taille structurelle atteinte ; extraction partielle.');
+  if(pathLimitHit)warnings.push('Clé ou chemin JSON trop long : branche ignorée, provenance et extraction partielles.');
   const groupsByVariantId=new Map();
   for(const node of nodes)if(isType(node.value,'ProductGroup'))for(const v of Array.isArray(node.value.hasVariant)?node.value.hasVariant:node.value.hasVariant?[node.value.hasVariant]:[])if(typeof v?.['@id']==='string')groupsByVariantId.set(v['@id'],node.value);
   const baseURL=sourceURL||source.canonicalUrl;
-  const candidates=[];let productCount=0;
+  const candidates=[];let productCount=0,outputBytes=0,outputLimitHit=false;
   function resolve(value,path){if(safeObject(value)&&typeof value['@id']==='string'&&Object.keys(value).length===1){const ref=indexed.get(value['@id']);if(ref)return ref;}return {value,path};}
   for(const node of nodes){
+    if(outputLimitHit)break;
     if(++productCount>LIMITS.products){warnings.push('Limite de 100 produits atteinte.');break;}
     const p=node.value;
     if(isType(p,'ProductGroup') && p.hasVariant && !p.offers)continue;
@@ -168,15 +185,18 @@ export async function extractOffers(input,options={}) {
       if(price===null&&!aggregate)cw.push('Prix non publié ou non interprétable ; il reste inconnu.');
       const currency=cleanCurrency(o.priceCurrency,cw);
       if(!currency)cw.push('Devise inconnue ou non validée.');
-      const availability=text(o.availability)?.split(/[\/#]/).pop()||null;
+      const availability=cleanAvailability(o.availability,cw);
       const offer={kind:aggregate?'AggregateOffer':'Offer',price,priceLow:low,priceHigh:high,currency,availability,url:safeSourceURL(o.url,baseURL),taxIncluded:null,shippingAmount:null,shippingDestination:null,deliveryDays:null};
       cw.push('Prix livré, taxes et livraison à destination non établis par cette extraction.');
       if(availability)cw.push('Disponibilité déclarée par la source ; pas une garantie de livraison en France.');
       if(!product.name)cw.push('Nom du produit absent.');
       const evidence=[];
-      for(const [field,key] of [['price','price'],['priceLow','lowPrice'],['priceHigh','highPrice'],['currency','priceCurrency'],['availability','availability']])if(o[key]!==undefined)evidence.push({field:'offer.'+field,method:node.method,path:path+'.'+key,rawValue:text(o[key])});
+      for(const [field,key] of [['price','price'],['priceLow','lowPrice'],['priceHigh','highPrice'],['currency','priceCurrency'],['availability','availability']])if(o[key]!==undefined)evidence.push({field:'offer.'+field,method:node.method,path:path+'.'+key,rawValue:key==='availability'?availability:text(o[key])});
       if(p.name!==undefined)evidence.push({field:'product.name',method:node.method,path:node.path+'.name',rawValue:text(p.name)});
-      candidates.push({id:'candidate-'+candidates.length,product:{...product},offer,evidence,provenance:{method:node.method,productPath:node.path,offerPath:path},warnings:cw});
+      const candidate={id:'candidate-'+candidates.length,product:{...product},offer,evidence,provenance:{method:node.method,productPath:node.path,offerPath:path},warnings:cw};
+      const bytes=new TextEncoder().encode(JSON.stringify(candidate)).length;
+      if(outputBytes+bytes>LIMITS.outputBytes){outputLimitHit=true;warnings.push('Limite de taille des offres extraites atteinte ; des offres ont été omises.');break;}
+      outputBytes+=bytes;candidates.push(candidate);
     }
   }
   if(!candidates.length)warnings.push('Aucun produit exploitable détecté ; ne pas déduire un prix à partir de la seule URL.');

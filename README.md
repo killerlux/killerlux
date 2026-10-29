@@ -13,6 +13,12 @@ Atelier gratuit de recherche : relever des offres publiques, conserver leurs sou
 
 Les exemples de recherche datent du 29 octobre 2026. Ils restent tous **non validés pour un lancement**. Un prix catalogue connu ne valide pas la qualité, la livraison d'une commande particulière ou la demande pour une nouvelle offre.
 
+## Essayer le produit physique
+
+[Trace — créateur d'affiches GPX](route-poster/index.html) transforme un parcours en affiche 30 × 40 cm et exporte gratuitement un SVG ou un PNG haute résolution. Le traitement reste local, sans fond de carte ni envoi du parcours. L'exemple initial est fictif et signalé dans les exports.
+
+Le dossier correspondant documente Print API : 3,80 € HT d'impression + 10,75 € HT de port France + 0,40 € HT de traitement, soit **14,95 € HT indicatifs pour une unité**. Une API acceptant des fichiers distincts est documentée. L'accès live, le devis final, le fichier prêt à imprimer et la qualité physique restent à qualifier. Aucun paiement ni ordre d'impression n'est activé.
+
 ## Fonctionnement
 
 Application statique, JavaScript natif, sans dépendance d'exécution, sans backend, sans compte et sans suivi applicatif. Le seul chargement de données est le fichier de recherche statique `data/cases.json` du même site. Les documents et paramètres importés restent dans le navigateur ; rien n'est sauvegardé automatiquement.
@@ -36,6 +42,7 @@ L'analyse de sensibilité applique séparément quatre variations choisies : acq
 - [Loi bêta-binomiale — documentation SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.betabinom.html)
 - [Extraction et collecte locales](EXTRACTION.md)
 - [Recherche concurrentielle et limites du positionnement](RESEARCH.md)
+- [Données publiques et conditions d'un modèle de réussite avant lancement](DATA-AVAILABILITY.md)
 
 ## Développement et validation
 
@@ -49,6 +56,9 @@ npm test
 # Le binaire Chromium est attendu à /usr/bin/chromium dans cet environnement.
 python tests/test_extract.py
 python tests/test_app.py
+
+# Import GPX, géométrie, exports et affichage du créateur d'affiches
+python route-poster/tests/browser_test.py
 ```
 
 Les tests navigateur créent leurs propres serveurs locaux et ne contactent aucun site marchand. Les tests couvrent notamment les montants manquants, TVA, variantes, devises, captures, HTML hostile, données non pertinentes exclues du collecteur, calculs probabilistes analytiques, limites numériques, exemples fictifs, export et affichage mobile.

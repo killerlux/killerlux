@@ -145,5 +145,60 @@ class ExtractTests(unittest.TestCase):
         self.assertEqual(capture['products'][0]['offers'][0]['price'],'29')
         self.assertEqual(capture['products'][0]['brand'],{'name':'Marque'})
 
+    def capture_collector(self,fixture):
+        bookmarklet=self.page.evaluate("async url => (await import(url)).createBookmarklet()",self.base+'/src/collector.js')
+        self.page.route('http://public.example.test/**',lambda route:route.fulfill(content_type='text/html',body='<!doctype html><html><body></body></html>'))
+        self.page.goto('http://public.example.test/product')
+        self.page.evaluate("data=>{const s=document.createElement('script');s.type='application/ld+json';s.textContent=JSON.stringify(data);document.body.appendChild(s);}",fixture)
+        with self.page.expect_download() as received:
+            self.page.evaluate("url => (0,eval)(decodeURIComponent(url.slice('javascript:'.length)))",bookmarklet)
+        with tempfile.TemporaryDirectory() as directory:
+            target=Path(directory)/'capture.json';received.value.save_as(target);raw=target.read_text()
+        return raw,json.loads(raw)
+
+    def test_collector_cycles_are_cut_with_warning(self):
+        fixture={'@type':'ProductGroup','@id':'#loop','name':'x'*1000,'hasVariant':[{'@id':'#loop'},{'@id':'#loop'}],
+                 'offers':{'@type':'AggregateOffer','@id':'#offer-loop','lowPrice':'10','highPrice':'20','priceCurrency':'EUR','offers':[{'@id':'#offer-loop'},{'@id':'#offer-loop'}]}}
+        raw,capture=self.capture_collector(fixture)
+        self.assertLess(len(raw),10000)
+        self.assertEqual(capture['products'][0]['hasVariant'],[])
+        self.assertEqual(capture['products'][0]['offers'][0]['offers'],[])
+        self.assertTrue(any('cyclique de produit' in w for w in capture['warnings']))
+        self.assertTrue(any('cyclique d’offre' in w for w in capture['warnings']))
+
+    def test_collector_shared_offer_is_retained_for_each_variant(self):
+        fixture={'@graph':[{'@type':'ProductGroup','name':'Sac','hasVariant':[
+            {'@type':'Product','name':'Rouge','offers':{'@id':'#same-offer'}},
+            {'@type':'Product','name':'Bleu','offers':{'@id':'#same-offer'}}]},
+            {'@type':'Offer','@id':'#same-offer','price':'29','priceCurrency':'EUR'}]}
+        raw,capture=self.capture_collector(fixture)
+        variants=capture['products'][0]['hasVariant']
+        self.assertEqual([p['offers'][0]['price'] for p in variants],['29','29'])
+
+    def test_long_keys_and_excessive_attributes_are_bounded(self):
+        fixture={'A'*30000:[{'@type':'Product','name':'Item','offers':{'price':'10','priceCurrency':'EUR'}} for _ in range(20)]}
+        result=self.extract(fixture)
+        self.assertEqual(result['candidates'],[])
+        self.assertLess(len(json.dumps(result)),10000)
+        self.assertTrue(any('chemin JSON trop long' in w for w in result['warnings']))
+        html='<div '+' '.join('x'+str(i)+'="a"' for i in range(5000))+'></div>'
+        result=self.extract(html,format='html')
+        self.assertTrue(any('attributs HTML' in w for w in result['warnings']))
+
+    def test_nonstandard_availability_does_not_export_url_token(self):
+        for value in ['https://shop.example/stock?token=SECRET_AVAILABILITY','https://schema.org/InStock?token=SECRET_AVAILABILITY']:
+            result=self.extract({'@type':'Product','name':'Test','offers':{'price':'10','priceCurrency':'EUR','availability':value}})
+            self.assertNotIn('SECRET_AVAILABILITY',json.dumps(result))
+            self.assertIn(result['candidates'][0]['offer']['availability'],[None,'InStock'])
+
+    def test_output_budget_limits_repeated_product_fields(self):
+        fixture={'@type':'Product','name':'n'*2000,'brand':'b'*2000,'sku':'s'*2000,'mpn':'m'*2000,'material':'t'*2000,
+                 'offers':[{'@type':'Offer','price':'10','priceCurrency':'EUR'} for _ in range(200)]}
+        result=self.extract(fixture)
+        self.assertGreater(len(result['candidates']),0)
+        self.assertLess(len(result['candidates']),200)
+        self.assertLess(len(json.dumps(result,separators=(',',':')).encode()),1_010_000)
+        self.assertTrue(any('taille des offres extraites' in w for w in result['warnings']))
+
 if __name__=='__main__':
     unittest.main(verbosity=2)

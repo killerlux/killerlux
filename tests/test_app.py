@@ -56,7 +56,10 @@ class AppTests(unittest.TestCase):
             return json.loads(target.read_text())
 
     def test_initial_research_never_invents_a_success_probability(self):
-        self.assertEqual(self.page.locator('#landed-cost').input_value(), '11.95')
+        self.assertEqual(self.page.locator('#landed-cost').input_value(), '14.95')
+        quote=self.page.locator('#observed-offers a[href*="shipping-quote"]').get_attribute('href')
+        self.assertIn('productId=poster_30x40',quote)
+        self.assertIn('country=74',quote)
         self.assertIn('Lancement non validé', self.page.locator('#case-overview').inner_text())
         self.tab('probability')
         self.assertIn('Probabilité non estimable', self.page.locator('#probability-results').inner_text())
@@ -86,7 +89,7 @@ class AppTests(unittest.TestCase):
         exported=self.export()
         self.assertEqual(exported['probability']['status'], 'scenario')
         self.assertIn('FICTIF', exported['probabilityInput']['provenance'])
-        self.assertAlmostEqual(exported['probability']['probability'], 0.378633, delta=0.001)
+        self.assertAlmostEqual(exported['probability']['probability'], 0.096769136, delta=0.001)
         self.assertEqual(exported['probability']['expectedTraffic'], 1000)
         self.assertEqual(exported['probability']['fixedCosts'], '40')
         self.assertEqual(len(exported['sensitivity']['rows']), 4)
@@ -139,7 +142,7 @@ class AppTests(unittest.TestCase):
         self.page.wait_for_function("document.querySelector('#case-picker').value === 'poster-gpx'")
         self.assertNotIn('GUARANTEED_WINNER',self.page.locator('#case-overview').inner_text())
         self.assertIn('Dossier restauré',self.page.locator('#case-overview').inner_text())
-        self.assertEqual(self.page.locator('#landed-cost').input_value(),'11.95')
+        self.assertEqual(self.page.locator('#landed-cost').input_value(),'14.95')
         self.assertEqual(self.page.locator('#observed-visits').input_value(),'500')
         self.assertEqual(self.page.locator('.probability-number').count(),0)
         self.assertIsNone(self.export()['probability'])
@@ -150,7 +153,7 @@ class AppTests(unittest.TestCase):
         self.page.locator('#project-file').set_input_files({'name':'bad.json','mimeType':'application/json','buffer':b'{"tool":"wrong"}'})
         self.page.wait_for_function("document.querySelector('#global-status').textContent.includes('Reprise impossible')")
         self.assertEqual(self.page.locator('#case-picker').input_value(),'poster-gpx')
-        self.assertEqual(self.page.locator('#landed-cost').input_value(),'11.95')
+        self.assertEqual(self.page.locator('#landed-cost').input_value(),'14.95')
 
     def test_rejects_oversized_import_without_processing(self):
         self.page.locator('#source-file').set_input_files({'name':'huge.json','mimeType':'application/json','buffer':b' '*2_000_001})

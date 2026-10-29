@@ -12,7 +12,7 @@ const decimal=value=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:2}).fo
 const percent=value=>new Intl.NumberFormat('fr-FR',{style:'percent',maximumFractionDigits:1}).format(value);
 const probabilityText=value=>value<0.001?'< 0,1 %':value>0.999?'> 99,9 %':percent(value);
 function node(tag,attributes={},...children){const n=document.createElement(tag);for(const [key,value] of Object.entries(attributes)){if(value===null||value===undefined)continue;if(key==='class')n.className=value;else if(key.startsWith('on')&&typeof value==='function')n.addEventListener(key.slice(2),value);else n.setAttribute(key,String(value));}for(const child of children.flat(Infinity)){if(child===null||child===undefined)continue;n.append(child instanceof Node?child:document.createTextNode(String(child)));}return n;}
-function externalLink(url,label){const safe=safeSourceURL(url);return safe?node('a',{href:safe,target:'_blank',rel:'noopener noreferrer'},label):node('span',{},label+' — URL non exploitable');}
+function externalLink(url,label,trustedCitation=false){let safe=safeSourceURL(url);if(safe&&trustedCitation){const cited=new URL(safe);cited.search=new URL(url).search;safe=cited.href;}return safe?node('a',{href:safe,target:'_blank',rel:'noopener noreferrer'},label):node('span',{},label+' — URL non exploitable');}
 function label(text,kind='neutral'){return node('span',{class:'label '+kind},text);}
 function row(name,value){return node('div',{class:'data-row'},node('dt',{},name),node('dd',{},value));}
 function notice(title,description,kind=''){return node('div',{class:'notice '+kind},node('strong',{},title),node('span',{},description));}
@@ -29,7 +29,7 @@ const economicKeys=['price','vatMode','vatRate','landedCost','paymentRate','paym
 const economicLabels={price:'prix total',vatMode:'régime de TVA',vatRate:'taux de TVA',landedCost:'coût produit livré',paymentRate:'frais variables',paymentFixed:'frais fixes de paiement',returnReserve:'provision incidents',fixedAllocation:'allocation des charges fixes',desiredProfit:'contribution souhaitée',assumedCpc:'coût du clic'};
 function readEconomics(){return Object.fromEntries(economicKeys.map((key,i)=>[key,selectedField(economicIds[i])]));}
 function imports(){return importsByCase.get(currentCase?.id)||[];}
-function sourceLinks(ids){return (ids||[]).map(id=>currentCase.sources.find(s=>s.id===id)).filter(Boolean).map(s=>externalLink(s.url,s.label));}
+function sourceLinks(ids){return (ids||[]).map(id=>currentCase.sources.find(s=>s.id===id)).filter(Boolean).map(s=>externalLink(s.url,s.label,true));}
 function switchPanel(name){for(const button of document.querySelectorAll('.tab')){const active=button.dataset.panel===name;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');}for(const section of document.querySelectorAll('.panel-view'))section.hidden=section.id!=='panel-'+name;}
 
 function renderCase(){
@@ -37,12 +37,12 @@ function renderCase(){
   $('economics-form').reset();
   $('source-file').value='';$('source-content').value='';$('source-url').value='';
   setStatus('import-status',imports().length?imports().length+' relevé(s) déjà présent(s) dans ce dossier.':'Aucun fichier n’a été analysé dans ce dossier.');
-  $('case-overview').replaceChildren(node('div',{class:'case-banner'},node('div',{},node('h3',{},c.name),node('p',{},c.summary),node('div',{class:'blockers'},c.blockers.map(t=>node('span',{},t)))),label('Lancement non validé','hold')));
+  $('case-overview').replaceChildren(node('div',{class:'case-banner'},node('div',{},node('h3',{},c.name),node('p',{},c.summary),c.id==='poster-gpx'?node('p',{},node('a',{href:'./route-poster/index.html'},'Essayer Trace : créer une affiche GPX gratuitement →')):null,node('div',{class:'blockers'},c.blockers.map(t=>node('span',{},t)))),label('Lancement non validé','hold')));
   $('sale-price').value=c.scenario.salePrice??'';$('landed-cost').value=c.scenario.cost??'';$('vat-mode').value='collect';$('vat-rate').value=c.scenario.vatRate??20;
   $('cost-provenance').textContent=c.scenario.costIsVerified?'Coût catalogue documenté · autres hypothèses':'Coût livré non documenté';
   $('cost-provenance').className='label '+(c.scenario.costIsVerified?'fact':'missing');
   const offers=[];
-  if(c.supplier){const s=c.supplier;offers.push(node('article',{class:'offer'},node('div',{class:'offer-heading'},node('h4',{},s.name),node('span',{class:'offer-price'},s.productCost===null?'Prix inconnu':money(s.productCost,s.currency))),node('p',{},s.sku||'Référence non confirmée'),node('div',{class:'badges'},label('Fournisseur'),label(s.costBasis==='unknown'?'Base fiscale inconnue':s.costBasis),label(s.personalizationAutomation==='manual'?'Personnalisation manuelle':s.personalizationAutomation==='documented'?'Fonction documentée':'Automatisation à vérifier','hold')),node('p',{},s.label),node('p',{},'Port France : '+(s.shippingCost===null?'inconnu':money(s.shippingCost,s.currency))+' · origine : '+s.fulfillmentOrigin),node('div',{class:'stack'},sourceLinks(s.sourceIds))));}
+  if(c.supplier){const s=c.supplier;offers.push(node('article',{class:'offer'},node('div',{class:'offer-heading'},node('h4',{},s.name),node('span',{class:'offer-price'},s.productCost===null?'Prix inconnu':money(s.productCost,s.currency))),node('p',{},s.sku||'Référence non confirmée'),node('div',{class:'badges'},label('Fournisseur'),label(s.costBasis==='unknown'?'Base fiscale inconnue':s.costBasis),label(s.personalizationAutomation==='manual'?'Personnalisation manuelle':s.personalizationAutomation==='documented'?'Fonction documentée':'Automatisation à vérifier','hold')),node('p',{},s.label),node('p',{},'Port France : '+(s.shippingCost===null?'inconnu':money(s.shippingCost,s.currency))+(s.handlingCost===undefined?'':' · traitement : '+money(s.handlingCost,s.currency))+' · origine : '+s.fulfillmentOrigin),node('div',{class:'stack'},sourceLinks(s.sourceIds))));}
   for(const o of c.competitors)offers.push(node('article',{class:'offer'},node('div',{class:'offer-heading'},node('h4',{},o.name),node('span',{class:'offer-price'},money(o.price,o.currency))),node('p',{},o.sku),node('div',{class:'badges'},label('Concurrent'),label(o.shippingIncluded===true?'Port annoncé inclus':o.shippingIncluded===false?'Prix hors port':'Port à vérifier'),o.available===false?label('Épuisé au relevé','hold'):null),node('div',{class:'stack'},sourceLinks(o.sourceIds))));
   $('observed-offers').replaceChildren(...(offers.length?offers:[empty('Dossier vierge','Importez un relevé de page publique pour commencer.')]));
   $('evidence-count').textContent=String(c.sources.length+imports().length);
@@ -125,7 +125,7 @@ function renderImports(){
 }
 
 function renderSources(){
-  const cards=currentCase.sources.map(s=>node('article',{class:'card source-card'},node('div',{},node('h3',{},s.label),node('p',{},s.fact),externalLink(s.url,s.url)),node('span',{class:'date'},'Relevé : '+s.checkedAt)));
+  const cards=currentCase.sources.map(s=>node('article',{class:'card source-card'},node('div',{},node('h3',{},s.label),node('p',{},s.fact),externalLink(s.url,s.url,true)),node('span',{class:'date'},'Relevé : '+s.checkedAt)));
   for(const [i,record] of imports().entries()){
     const s=record.result.source;
     cards.push(node('article',{class:'card source-card'},node('div',{},node('h3',{},'Relevé importé '+(i+1)),node('p',{},'Données fournies localement ; source et date déclarées, sans vérification en direct.'),s.url?externalLink(s.url,s.url):node('p',{},'URL d’origine inconnue'),node('p',{},'Capture : '+(s.captureTime||'inconnue')+' · import : '+s.importTime),s.sha256?node('details',{class:'method'},node('summary',{},'Empreinte du fichier importé'),node('p',{class:'code'},s.sha256),node('p',{},'Cette empreinte identifie le fichier ; elle ne prouve pas son authenticité.')):null),label('Source importée','neutral')));

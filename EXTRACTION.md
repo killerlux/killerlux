@@ -29,6 +29,8 @@ Le rendu UI doit utiliser `textContent`, jamais `innerHTML` avec les noms ou pre
 
 Ce parseur n'est pas un navigateur complet. Les pages nécessitant une exécution JavaScript, les contextes JSON-LD atypiques et le HTML très mal formé peuvent ne pas être interprétés. Les limites structurelles et les erreurs produisent des avertissements.
 
+Le parcours est limité à 64 niveaux, 20 000 nœuds, 100 produits et 200 offres. Les clés JSON de plus de 256 caractères et les branches dont le chemin excède le budget de 1 000 caractères sont ignorées avec avertissement. Le volume cumulé des candidats est plafonné à 1 Mo ; les métadonnées générales s'y ajoutent. Seuls les attributs HTML utiles sont décodés, avec une limite de 256 attributs par balise. Les valeurs de disponibilité non standard sont ignorées, y compris dans les preuves brutes.
+
 ## Collecteur en favori
 
 ```js
@@ -42,6 +44,8 @@ L'utilisateur glisse ce lien dans ses favoris, ouvre **une page produit publique
 Le collecteur lit seulement les blocs JSON-LD de la page courante, résout les références internes et copie une liste de champs produit/offre : nom, marque, SKU/GTIN/MPN, variante, prix, devise, disponibilité et URL. Les avis, auteurs, adresses d'organisation, formulaires, cookies, stockage local et API privées ne sont pas collectés. Les informations de livraison complexes ne sont pas copiées dans cette version.
 
 Le résultat est **téléchargé localement** dans `offres-publiques-AAAA-MM-JJ.json`. Aucune donnée n'est transmise à l'application ou à un tiers. Une page sans produit JSON-LD déclenche un message et ne produit aucun fichier. L'usage doit rester limité aux pages publiques ; les filtres de chemin compte/paiement ne peuvent pas prouver qu'une page est publique.
+
+Les références cycliques sont coupées ; une offre commune à plusieurs variantes reste utilisable. Des budgets globaux bornent les copies de produits et d'offres, et un relevé dépassant 2 Mo après extraction n'est pas téléchargé.
 
 Format de capture accepté directement par `extractOffers` :
 

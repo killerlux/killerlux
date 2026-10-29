@@ -22,6 +22,8 @@ Des distributions mal choisies peuvent produire une probabilité très précise 
 
 **Aucun résultat ne signifie “95 % de chances que votre entreprise réussisse”.** Avec des données insuffisantes, la bonne conclusion peut être de ne pas conclure.
 
+Pour prédire le succès **avant lancement**, il faudrait une cohorte de lancements comparables, comprenant les échecs, et leurs bénéfices après coûts complets. Les jeux publics UCI Online Retail, Google GA4 et Criteo examinés ne fournissent pas cet ensemble. La [note sur les données et la calibration](DATA-AVAILABILITY.md) précise leurs limites et le protocole mathématique possible si un tel historique devient disponible.
+
 ## Ce que l'outil ne sait pas
 
 Cette version ne possède pas d'index mondial du commerce en ligne. Elle ne recherche pas automatiquement tous les fournisseurs et ne dispose pas des revenus privés des boutiques ou d'un ensemble de ventes observées comparables permettant de prédire votre demande.

@@ -99,31 +99,35 @@
   },
   {
     "id": "poster-gpx",
-    "name": "Affiche A3 d'un parcours GPX personnel",
+    "name": "Affiche 30 × 40 cm d'un parcours GPX personnel",
     "category": "Impression à la demande personnalisée",
-    "summary": "Le coût d'impression d'un fichier prêt et son port France sont publics. La personnalisation TPOP documentée demande une intervention humaine.",
+    "summary": "Print API documente une fabrication aux Pays-Bas et des fichiers personnalisés par commande. Son calculateur indique 14,95 € HT livré en France ; le compte de production reste à obtenir.",
     "decision": "hold",
     "blockers": [
-      "Le vendeur doit modifier le visuel puis envoyer la commande personnalisée en production.",
-      "Le prix livré vérifié concerne l'impression d'un fichier prêt ; il n'inclut pas notre génération ni notre contrôle du fichier.",
-      "Les générateurs GPX et l'impression française existent déjà chez plusieurs concurrents.",
-      "Qualité, chaîne de paiement complète et acquisition rentable non validées."
+      "Accès live sur demande : acceptation et conditions du compte vendeur non testées.",
+      "14,95 € HT est une indication publique pour une unité, à confirmer par un devis avant commande ; 10,75 € sont du port.",
+      "Le prototype crée un fichier ; fond perdu, qualité imprimée, paiement et exécution réelle restent à qualifier.",
+      "Des générateurs GPX concurrents existent déjà. Aucun acheteur ni coût d'acquisition rentable observé."
     ],
     "supplier": {
-      "name": "TPOP",
-      "label": "Coût catalogue et port France vérifiés ; personnalisation automatique non qualifiée",
-      "sku": "Poster Vertical — mat A3, 29,7 × 42 cm",
-      "productCost": 8,
-      "shippingCost": 3.95,
+      "name": "Print API",
+      "label": "Tarif et devis indicatifs publics ; API documentée, compte de production non validé",
+      "sku": "poster_30x40 — 30 × 40 cm, une unité",
+      "productCost": 3.8,
+      "shippingCost": 10.75,
+      "handlingCost": 0.4,
       "currency": "EUR",
       "costBasis": "HT",
-      "fulfillmentOrigin": "France",
-      "personalizationAutomation": "manual",
+      "fulfillmentOrigin": "Groningen, Pays-Bas, annoncé par le fabricant",
+      "personalizationAutomation": "documented",
       "sourceIds": [
-        "poster-tpop-product",
-        "poster-tpop-shipping",
-        "poster-tpop-personalization",
-        "poster-tpop-payment"
+        "poster-printapi-product",
+        "poster-printapi-quote",
+        "poster-printapi-shipping",
+        "poster-printapi-origin",
+        "poster-printapi-files",
+        "poster-printapi-access",
+        "poster-printapi-payment"
       ]
     },
     "competitors": [
@@ -152,6 +156,55 @@
     ],
     "sources": [
       {
+        "id": "poster-printapi-product",
+        "label": "Catalogue fournisseur — Print API 30 × 40 cm",
+        "url": "https://www.printapi.io/products/posters",
+        "checkedAt": "2026-10-29",
+        "fact": "Référence poster_30x40 affichée à 3,80 € HT. Le format 30 × 40 cm n'est pas un A3."
+      },
+      {
+        "id": "poster-printapi-quote",
+        "label": "Calculateur indicatif — une affiche 30 × 40 vers la France",
+        "url": "https://www.printapi.io/shipping-quote?productId=poster_30x40&pageCount=1&quantity=1&country=74",
+        "checkedAt": "2026-10-29",
+        "fact": "France (country=74), une unité : 10,75 € de port et 0,40 € de traitement. Avec le produit à 3,80 €, total indicatif 14,95 € HT ; aucun devis authentifié ni commande exécutée."
+      },
+      {
+        "id": "poster-printapi-shipping",
+        "label": "Base fiscale et limites du calculateur — Print API",
+        "url": "https://portal.printapi.nl/test/docs/section/shipping?t=EN",
+        "checkedAt": "2026-10-29",
+        "fact": "Shipping et handling hors TVA. Le calculateur public fournit une indication ; un devis API avant commande permet de confirmer les conditions."
+      },
+      {
+        "id": "poster-printapi-origin",
+        "label": "Origine de fabrication — Print API",
+        "url": "https://www.printapi.io/about",
+        "checkedAt": "2026-10-29",
+        "fact": "Le fournisseur annonce l'impression en interne de tous ses produits à Groningen, aux Pays-Bas. Aucun échantillon physique contrôlé."
+      },
+      {
+        "id": "poster-printapi-files",
+        "label": "Fichiers par commande — documentation API",
+        "url": "https://portal.printapi.nl/test/docs/section/files?t=EN",
+        "checkedAt": "2026-10-29",
+        "fact": "Fichiers PDF, PNG ou JPEG par URL ou upload ; fichiers différents par article prévus. Cela documente la possibilité technique, pas une intégration de production déjà testée."
+      },
+      {
+        "id": "poster-printapi-access",
+        "label": "Accès test et production — Print API",
+        "url": "https://portal.printapi.nl/test/docs/section/general?t=EN",
+        "checkedAt": "2026-10-29",
+        "fact": "Inscription test gratuite puis demande de compte live depuis le tableau de bord. Aucun compte créé ; acceptation et conditions propres au vendeur non établies."
+      },
+      {
+        "id": "poster-printapi-payment",
+        "label": "Modes de paiement — Print API",
+        "url": "https://portal.printapi.nl/test/docs/section/checkout?t=EN",
+        "checkedAt": "2026-10-29",
+        "fact": "Paiement client hébergé avec reversement mensuel ou facturation au vendeur documentés. Conditions, frais et trésorerie à confirmer ; aucune absence universelle d'avance garantie."
+      },
+      {
         "id": "poster-tpop-product",
         "label": "Catalogue fournisseur — TPOP A3 mat",
         "url": "https://www.tpop.com/products/vertical-poster-premium",
@@ -170,7 +223,7 @@
         "label": "Procédure de personnalisation — TPOP",
         "url": "https://help.tpop.com/impression-a-la-demande/les-produits-a-la-demande/comment-rendre-un-produit-personnalisable",
         "checkedAt": "2026-10-29",
-        "fact": "La commande attend la personnalisation : le vendeur remplace le visuel ou ajoute le texte, puis l'envoie en production."
+        "fact": "Le tutoriel décrit une modification manuelle avant production. Il ne prouve pas l'absence de toute API : notre automatisation chez TPOP reste non vérifiée. Alternative A3 à 11,95 € HT livré ; ne pas combiner ce prix avec l'API Print API."
       },
       {
         "id": "poster-tpop-payment",
@@ -196,7 +249,7 @@
     ],
     "scenario": {
       "salePrice": 34.9,
-      "cost": 11.95,
+      "cost": 14.95,
       "costIsVerified": true,
       "vatRate": 20
     }
