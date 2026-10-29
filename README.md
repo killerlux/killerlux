@@ -19,6 +19,16 @@ Les exemples de recherche datent du 29 octobre 2026. Ils restent tous **non vali
 
 Le dossier correspondant documente Print API : 3,80 € HT d'impression + 10,75 € HT de port France + 0,40 € HT de traitement, soit **14,95 € HT indicatifs pour une unité**. Une API acceptant des fichiers distincts est documentée. L'accès live, le devis final, le fichier prêt à imprimer et la qualité physique restent à qualifier. Aucun paiement ni ordre d'impression n'est activé.
 
+## Studio de campagnes
+
+[Ouvrir le studio](campaigns/index.html) : six concepts distincts pour les deux outils gratuits, douze visuels PNG/SVG, deux vidéos verticales de quinze secondes, textes et pages de découverte. Les priorités jugent la clarté du message ; aucune conversion publicitaire n'est observée et aucun budget n'est engagé.
+
+Les pages [Trace](discover/trace.html) et [Dossier Commerce](discover/commerce.html) adaptent leur message à un angle connu. Elles conduisent aux fonctions concernées et transmettent seulement des paramètres UTM autorisés, cohérents avec le produit. Les valeurs arbitraires et paramètres privés sont écartés. Aucun pixel ni compteur de visiteurs n'est ajouté.
+
+Le studio examine localement des agrégats CSV fournis manuellement. Valeur inconnue et zéro restent distincts. L'intervalle de Wilson sur une action gratuite exige une provenance, une période et les déclarations d'observation appropriées ; il ne mesure aucune probabilité de succès commercial. Modifier les entrées invalide le résultat précédent. Les fichiers d'exemple sont explicitement fictifs.
+
+L'hébergement de démonstration peut présenter une confirmation d'accès. Une arrivée directe doit être vérifiée sur un hébergement adapté avant toute acquisition payante. Les versions actuelles sont gratuites, sans revenu par activation établi : leur promotion ne constitue pas une validation de rentabilité.
+
 ## Fonctionnement
 
 Application statique, JavaScript natif, sans dépendance d'exécution, sans backend, sans compte et sans suivi applicatif. Le seul chargement de données est le fichier de recherche statique `data/cases.json` du même site. Les documents et paramètres importés restent dans le navigateur ; rien n'est sauvegardé automatiquement.
@@ -59,6 +69,12 @@ python tests/test_app.py
 
 # Import GPX, géométrie, exports et affichage du créateur d'affiches
 python route-poster/tests/browser_test.py
+
+# Six parcours de campagne, médias, import de métriques et affichage mobile
+python tests/test_campaigns.py
+
+# Recréer les visuels originaux à partir des textes et du générateur GPX
+npm run assets
 ```
 
 Les tests navigateur créent leurs propres serveurs locaux et ne contactent aucun site marchand. Les tests couvrent notamment les montants manquants, TVA, variantes, devises, captures, HTML hostile, données non pertinentes exclues du collecteur, calculs probabilistes analytiques, limites numériques, exemples fictifs, export et affichage mobile.
@@ -70,3 +86,5 @@ La politique CSP interdit les scripts et cadres externes. Les imports HTML sont 
 Cette version est un outil gratuit de recherche et d'apprentissage. Elle ne contient aucun paiement, catalogue marchand, abonnement, promesse de gain ou transaction commerciale. L'hébergement d'une future activité commerciale nécessiterait un service et une configuration adaptés ; la publication de cette version ne constitue pas le lancement d'une activité rentable.
 
 Les imports utilisateurs ne sont jamais enregistrés dans le dépôt. L'hébergeur peut conserver ses propres journaux techniques. Les noms de marques mentionnés servent uniquement à citer les sources, sans affiliation revendiquée.
+
+Les fichiers peuvent être servis tels quels par un hébergement statique HTTPS ; aucune étape de build n'est requise en production. Les SVG/PNG et MP4 déjà présents sont les actifs à publier. Les scripts de génération et les tests servent au développement. Le fichier `_headers` fournit des en-têtes pour les hébergeurs qui reconnaissent ce format ; les politiques CSP des pages restent présentes même lorsqu'il est ignoré.

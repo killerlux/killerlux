@@ -6,3 +6,61 @@
 @media(max-width:540px){.wrap{padding-left:16px;padding-right:16px}.brand{font-size:15px;gap:9px}.brand small{font-size:8px;letter-spacing:1px}.brand-mark{width:36px;height:36px;font-size:20px}.header-end .button{font-size:10px;padding:9px}.hero{padding:25px 23px;border-radius:18px}h1{font-size:31px;letter-spacing:-1.3px}.hero p:not(.eyebrow){font-size:13px}.workspace-heading{display:block;margin-top:27px}.case-select{max-width:none;min-width:0;margin-top:17px}.case-banner{display:block;padding:18px}.case-banner>.label{margin-top:13px}.tabs{gap:16px;margin-top:20px}.tab{font-size:12px;padding-top:13px;padding-bottom:13px}.section-intro h2{font-size:21px}.card{padding:20px 18px}.field-grid{gap:15px 12px}.field-grid label{font-size:11px;line-height:1.5}.metric{padding:13px}.metric strong{font-size:27px}.footer{display:block}.footer p{margin-top:15px}.source-card{grid-template-columns:1fr;gap:4px}.offer-price{font-size:17px!important}.action-row .button{flex:1}.notice{padding:13px 15px}.panel-view{padding-top:23px}}
 .project-status:empty{display:none}.project-status:not(:empty){padding-top:0;padding-bottom:18px;margin-top:0;font-size:12px;color:var(--green)}.project-status.error{color:var(--red)}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* A short path from a campaign promise to evidence and the first calculation. */
+.hero{grid-template-columns:minmax(0,1fr) 275px;gap:48px;align-items:stretch}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.hero-actions .button{gap:18px;min-height:46px;padding:12px 18px;font-size:13px}
+.button.hero-primary{background:#e8f0d8;color:#183c34;border-color:#e8f0d8}
+.button.hero-secondary{color:#edf4e9;border-color:#789283;background:transparent}
+.hero p.hero-footnote{font-size:11px;color:#c1d1c3;margin-top:15px}
+.hero-aside{padding:25px;border:1px solid #536e5e;border-radius:15px;background:#234639;gap:13px}
+.hero-aside .hero-line{font-size:9px;color:#becfbb;letter-spacing:1.1px}
+.hero-aside .hero-price{display:flex;flex-direction:column;gap:2px}
+.hero-aside .hero-price>span{font-size:23px;color:#d2ddce;line-height:1.2}
+.hero-aside .hero-price small{font-size:10px;color:#becfbb}
+.hero-aside .hero-price.total{border-top:1px solid #55705e;padding-top:13px}
+.hero-aside .hero-price strong{font-size:43px;letter-spacing:-1.5px;font-weight:600;line-height:1.05}
+.hero-aside p{font-size:10px!important;line-height:1.6!important}
+.hero-aside button{padding:0;text-align:left;border:0;background:none;margin-top:1px;font-size:11px}
+.case-comparison{margin:35px 0 30px;scroll-margin-top:22px}
+.comparison-heading{display:grid;grid-template-columns:1.1fr 1fr;gap:45px;align-items:end;margin-bottom:18px}
+.comparison-heading h2{font-size:23px;max-width:390px;margin-bottom:0}
+.comparison-heading p:not(.eyebrow){font-size:12px;line-height:1.65;color:var(--muted);max-width:500px;margin:0}
+.comparison-heading .eyebrow{margin-bottom:7px}
+.comparison-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+.comparison-card{padding:19px 18px 16px;border:1px solid var(--line);border-radius:14px;background:#fff;min-width:0;display:flex;flex-direction:column}
+.comparison-card.selected{border-color:#7b9c7e;background:#f0f5e8;box-shadow:inset 0 3px 0 var(--green)}
+.comparison-card-top{min-height:61px}.comparison-card h3{font-size:16px;margin:0 0 8px}
+.comparison-card .label{padding:4px 7px;font-size:9px}
+.comparison-price{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;font-size:26px;font-weight:650;letter-spacing:-1px;color:var(--ink);line-height:1.1;margin:16px 0 3px}
+.comparison-price span{font-size:9px;font-weight:500;letter-spacing:0;color:var(--muted)}
+.comparison-detail{font-size:10px;color:var(--muted);margin:0 0 12px}
+.comparison-card .data-row{padding:7px 0;gap:8px;font-size:10px}
+.comparison-card .data-row dd{font-weight:550}
+.comparison-gap{font-size:10px;color:var(--muted);line-height:1.5;margin:10px 0 12px;min-height:30px}
+.comparison-card .button{margin-top:auto;width:100%}
+.comparison-card.selected .button{background:var(--green);color:white;border-color:var(--green)}
+.workspace-heading{scroll-margin-top:22px}
+.case-demo-link{margin-top:10px!important}
+.case-blockers{margin-top:12px}
+.case-blockers summary{font-size:11px;color:#526557}
+.case-blockers ul{padding-left:17px;margin:9px 0 0;max-width:780px}
+.case-blockers li{font-size:11px;color:#526557;margin:5px 0}
+.try-import{display:flex;gap:25px;justify-content:space-between;align-items:center;padding:18px 21px;margin:0 0 22px;background:#eef3e7;border:1px solid #d5e1cb;border-radius:13px}
+.try-import strong{font-size:14px}.try-import p{font-size:11px;line-height:1.65;color:var(--muted);margin:4px 0 0;max-width:690px}
+.try-import .button{flex:none;font-size:12px}
+.supplier-total{text-align:right;flex:none}.supplier-total strong{display:block;font-size:25px;letter-spacing:-1px;color:var(--ink);line-height:1.2}
+.supplier-total small{display:block;font-size:10px;color:var(--muted);line-height:1.6}
+.supplier-costs{background:#f5f7f1;padding:5px 13px;margin:14px 0;border-radius:9px}
+.supplier-costs .data-row:last-child{border:0}.supplier-costs .data-row{font-size:11px;padding:8px 0}
+.supplier-sources .stack{gap:7px;margin-top:10px}.supplier-sources{margin-top:13px;padding-top:12px}
+.comparison-caution{font-size:10px!important;font-style:italic}
+.economics-guide{display:flex;align-items:center;gap:13px;padding:16px 18px;border:1px solid var(--line);background:#edf3e7;border-radius:12px;margin:0 0 22px}
+.guide-number{display:grid;place-items:center;flex:none;border-radius:50%;width:31px;height:31px;border:1px solid #b5c8ae;font-size:13px;color:var(--green)}
+.economics-guide p{font-size:11px;line-height:1.65;color:var(--muted);margin:0;flex:1}.economics-guide p strong{color:var(--ink)}
+.economics-guide a{font-size:11px;flex:none}
+.panel-view{scroll-margin-top:20px}
+@media(max-width:1050px){.hero{gap:25px;grid-template-columns:minmax(0,1fr) 245px}.comparison-card{padding:16px 13px}.comparison-card .data-row{display:block}.comparison-card .data-row dd{text-align:left;margin-top:3px}.comparison-card-top{min-height:60px}.comparison-gap{min-height:31px}}
+@media(max-width:800px){.hero{grid-template-columns:1fr}.hero-aside{display:none}.comparison-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.comparison-card .data-row{display:flex}.comparison-card .data-row dd{margin:0;text-align:right}.comparison-heading{gap:22px;grid-template-columns:1fr}.comparison-heading h2{max-width:none}.comparison-heading p:not(.eyebrow){max-width:none}.comparison-gap{min-height:0}.comparison-card-top{min-height:55px}.comparison-price{margin-top:10px}.economics-guide a{display:none}}
+@media(max-width:540px){.hero-actions{gap:9px}.hero-actions .button{font-size:11px;min-height:43px;padding:10px 12px;gap:7px}.hero p.hero-footnote{font-size:10px;line-height:1.6}.case-comparison{margin-top:27px}.comparison-heading{gap:12px;margin-bottom:15px}.comparison-heading h2{font-size:21px}.comparison-grid{gap:10px}.comparison-card{padding:15px 12px 12px}.comparison-card h3{font-size:14px}.comparison-card .label{font-size:8px;padding:3px 5px}.comparison-card .data-row{display:block;font-size:10px}.comparison-card .data-row dd{text-align:left;margin-top:3px}.comparison-price{font-size:24px}.comparison-price span{font-size:8px}.comparison-gap{min-height:45px}.comparison-card .button{font-size:10px;padding:8px 5px}.try-import{display:block;padding:16px}.try-import strong{font-size:13px}.try-import .button{margin-top:13px;width:100%}.supplier-total strong{font-size:23px}.supplier-total small{font-size:9px}.supplier-costs{padding:5px 10px}.economics-guide{align-items:start;padding:15px}.guide-number{width:26px;height:26px}}

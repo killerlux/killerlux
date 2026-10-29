@@ -10,6 +10,8 @@ from tempfile import TemporaryDirectory
 from threading import Thread
 import json
 import struct
+import re
+import xml.etree.ElementTree as ET
 
 from playwright.sync_api import sync_playwright, expect
 
@@ -37,16 +39,82 @@ def main():
             loading.close()
             checks.append("imports and exports remain disabled until the editor module is ready")
             page = browser.new_page(viewport={"width": 1280, "height": 1000}, accept_downloads=True)
+            page.emulate_media(reduced_motion='reduce')
             errors, requests = [], []
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.on("request", lambda request: requests.append(request.url))
             page.goto(f"http://127.0.0.1:{server.server_port}/route-poster/index.html")
             page.wait_for_function("() => document.querySelector('#preview').complete && document.querySelector('#preview').naturalWidth > 0")
-            assert page.locator("#preview-label").inner_text() == "EXEMPLE FICTIF"
+            assert page.locator("#preview-label").inner_text() == "EXEMPLE FICTIF · COURSE"
             assert "Prototype gratuit" in page.locator("footer").inner_text()
             expect(page.locator('#gpx')).to_be_enabled()
             expect(page.locator('#png')).to_be_enabled()
             checks.append("initial preview and explicit fictitious sample")
+
+            page.locator('.hero-actions a[href="#editor"]').click()
+            expect(page).to_have_url(re.compile(r"#editor$"))
+            expect(page.locator('#editor')).to_be_focused()
+            page.locator('.hero-actions a[href="#examples"]').click()
+            expect(page).to_have_url(re.compile(r"#examples$"))
+            page.locator('.topnote').click()
+            expect(page).to_have_url(re.compile(r"#gpx-help$"))
+            assert page.locator('#gpx-help a[target="_blank"]').count() == 3
+            assert "région de départ doit être débloquée" in page.locator('#gpx-help').inner_text()
+            faq = page.locator('.faq summary').first
+            faq.focus()
+            page.keyboard.press('Enter')
+            assert page.locator('.faq details').first.get_attribute('open') is not None
+            page.keyboard.press('Space')
+            assert page.locator('.faq details').first.get_attribute('open') is None
+            checks.append("hero anchors, editor focus, GPX help links, FAQ keyboard toggle")
+
+            examples = {}
+            for example_id, category, title, palette in (
+                ('run', 'COURSE', 'LE TOUR DES QUAIS', 'forest'),
+                ('trail', 'TRAIL', 'LÀ-HAUT, LES CRÊTES', 'clay'),
+                ('ride', 'VÉLO', 'LA GRANDE ÉCHAPPÉE', 'midnight'),
+            ):
+                page.locator(f'[data-example="{example_id}"]').click()
+                expect(page.locator('#editor')).to_be_focused()
+                assert page.locator('#preview-label').inner_text() == f'EXEMPLE FICTIF · {category}'
+                assert page.locator('#title').input_value() == title
+                assert page.locator(f'input[value="{palette}"]').is_checked()
+                with page.expect_download() as pending:
+                    page.locator('#svg').click()
+                download = pending.value
+                assert re.fullmatch(r'trace-[a-z0-9-]+-exemple-fictif-30x40\.svg', download.suggested_filename)
+                path = Path(temporary) / f'{example_id}.svg'
+                download.save_as(str(path))
+                xml = ET.fromstring(path.read_text())
+                assert f'{category} · TRACÉ FICTIF' in ''.join(xml.itertext())
+                examples[example_id] = xml.find('.//{http://www.w3.org/2000/svg}polyline').get('points')
+            assert len(set(examples.values())) == 3
+            checks.append("three distinct selectable examples, matching palettes/titles, explicit fictitious SVG exports and safe filenames")
+
+            typography = page.evaluate("""async () => {
+              const c=await import('./core.js');
+              const titles=['W'.repeat(64), 'Une longue traversée avec des amis et des souvenirs inoubliables', '🚲'.repeat(32), '<>&"\\' /../ éèàç: !?'.repeat(3)];
+              return titles.map(title=>{
+                const model=c.posterModel(c.demoRoute('trail'),{title});
+                const doc=new DOMParser().parseFromString(c.svgPoster(model),'image/svg+xml');
+                const svg=document.importNode(doc.documentElement,true); svg.setAttribute('width','900'); svg.setAttribute('height','1200');
+                svg.style.position='absolute';svg.style.left='-10000px';document.body.append(svg);
+                const nodes=[...svg.querySelectorAll('text')].filter(n=>n.getAttribute('font-family')==='Georgia' && Number(n.getAttribute('y'))<250);
+                const bounds=nodes.map(n=>{const b=n.getBBox();return {x:b.x,y:b.y,width:b.width,height:b.height};});
+                const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),calls=[],original=ctx.fillText.bind(ctx);
+                ctx.fillText=function(value,x,y,...rest){calls.push({value,x,y,font:this.font});return original(value,x,y,...rest);};
+                c.drawPoster(canvas,model);
+                const same=nodes.every(n=>calls.some(call=>call.value===n.textContent && call.x===Number(n.getAttribute('x')) && call.y===Number(n.getAttribute('y')) && Math.abs(parseFloat(call.font)-Number(n.getAttribute('font-size')))<0.0001));
+                svg.remove();
+                return {bounds,same,filename:c.exportFilename(title,true,'svg'),title:model.title,lines:model.titleLines.length};
+              });
+            }""")
+            for case in typography:
+                assert case['same'], case
+                assert all(bound['x'] >= 75 and bound['x'] + bound['width'] <= 825 and bound['y'] + bound['height'] < 245 for bound in case['bounds']), case
+                assert re.fullmatch(r'trace-[a-z0-9-]+-exemple-fictif-30x40\.svg', case['filename']), case
+                assert len(case['title']) <= 64 and case['lines'] in (1, 2)
+            checks.append("64-character/emoji/punctuation titles fit the poster; SVG and Canvas share line text/coordinates/font size; filenames normalized")
 
             result = page.evaluate("""async () => {
               const c = await import('./core.js');
@@ -135,7 +203,7 @@ def main():
             svg = path.read_text()
             assert 'width="300mm" height="400mm"' in svg
             assert "&lt;script&gt;" in svg and "<script>" not in svg
-            assert "TRACÉ FICTIF" not in svg and 'fill="#172a3a"' in svg
+            assert "TRACÉ FICTIF" not in "".join(ET.fromstring(svg).itertext()) and 'fill="#172a3a"' in svg
             assert "29 octobre 2026" in svg
             checks.append("real GPX import, title/date/palette updates, actual SVG download")
 
@@ -155,8 +223,32 @@ def main():
             assert "111,2" in page.locator("#distance").inner_text()
             page.locator("#demo").click()
             assert page.locator("#error").is_hidden()
-            assert page.locator("#preview-label").inner_text() == "EXEMPLE FICTIF"
+            assert page.locator("#preview-label").inner_text() == "EXEMPLE FICTIF · COURSE"
             checks.append("invalid import preserves previous route; demo reset works")
+
+            page.locator('#title').fill('AVANT EXPORT')
+            page.evaluate("""() => {
+              window.exportStarted=false; window.drawnTitles=[];
+              window.originalToBlob=HTMLCanvasElement.prototype.toBlob;
+              window.originalFillText=CanvasRenderingContext2D.prototype.fillText;
+              CanvasRenderingContext2D.prototype.fillText=function(value,...args){window.drawnTitles.push(value);return window.originalFillText.call(this,value,...args);};
+              HTMLCanvasElement.prototype.toBlob=function(callback,...args){window.exportStarted=true;return window.originalToBlob.call(this,blob=>setTimeout(()=>callback(blob),500),...args);};
+            }""")
+            with page.expect_download(timeout=20000) as pending:
+                page.locator('#png').click()
+                page.wait_for_function('() => window.exportStarted')
+                page.locator('#title').fill('APRES EXPORT')
+            assert pending.value.suggested_filename == 'trace-avant-export-exemple-fictif-30x40.png'
+            assert 'AVANT EXPORT' in page.evaluate('() => window.drawnTitles')
+            page.evaluate("""() => {HTMLCanvasElement.prototype.toBlob=window.originalToBlob;CanvasRenderingContext2D.prototype.fillText=window.originalFillText;}""")
+            checks.append("PNG asynchronous export retains the title and filename captured at click time")
+
+            unresolved = page.evaluate("""() => [...document.querySelectorAll('a[href^="#"], [aria-labelledby]')].flatMap(node=>{
+              const ids=node.hasAttribute('aria-labelledby') ? node.getAttribute('aria-labelledby').split(/\\s+/) : [node.getAttribute('href').slice(1)];
+              return ids.filter(id=>id&&!document.getElementById(id));
+            })""")
+            assert not unresolved, unresolved
+            checks.append("all fragment links and aria-labelledby references resolve")
 
             for width in (320, 375, 768, 1280):
                 page.set_viewport_size({"width": width, "height": 900})

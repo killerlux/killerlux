@@ -1,0 +1,128 @@
+[
+  {
+    "id": "trace-souvenir",
+    "project": "trace",
+    "name": "Trace · Le parcours à garder",
+    "angle": "Transformer une sortie personnelle en souvenir visuel téléchargeable.",
+    "headline": "Votre parcours mérite une affiche.",
+    "subheadline": "Créez le fichier depuis votre GPX.",
+    "disclosure": "Gratuit · sans compte · fichier numérique",
+    "primaryText": "Une sortie à garder ? Importez votre GPX, ajoutez un titre et une date, puis choisissez vos couleurs. Trace compose une affiche à télécharger gratuitement en PNG ou SVG. Votre fichier reste dans votre navigateur. Impression et commande non proposées.",
+    "shortHeadline": "Votre GPX, votre souvenir",
+    "cta": "En savoir plus",
+    "priority": "first",
+    "rationale": "Le bénéfice se comprend immédiatement et la composition produite peut être montrée réellement. C'est la première piste éditoriale pour Trace ; aucune supériorité de conversion n'a été observée.",
+    "risks": [
+      "Le mot affiche peut évoquer un produit imprimé : conserver la mention fichier numérique et l'absence de commande.",
+      "Le visiteur doit déjà posséder un GPX ou commencer avec l'exemple fictif ; ne pas promettre une connexion automatique à une application sportive.",
+      "Un téléchargement de démonstration ne prouve pas un usage personnel."
+    ],
+    "status": "draft",
+    "destinationPath": "/discover/trace.html?angle=souvenir"
+  },
+  {
+    "id": "trace-cadeau",
+    "project": "trace",
+    "name": "Trace · Le souvenir à partager",
+    "angle": "Composer un fichier souvenir personnel à partager, avec un titre et une date.",
+    "headline": "Un souvenir à composer et à partager.",
+    "subheadline": "Votre GPX, un titre, une date.",
+    "disclosure": "Fichier gratuit · impression non proposée",
+    "primaryText": "Donnez une forme à un parcours qui compte. Avec votre fichier GPX, composez un souvenir personnalisé : titre, date et trois palettes au choix. Téléchargez le PNG ou le SVG gratuitement, puis partagez le fichier si vous le souhaitez. Aucune impression ni livraison n'est proposée.",
+    "shortHeadline": "Un souvenir à partager",
+    "cta": "En savoir plus",
+    "priority": "reserve",
+    "rationale": "La personnalisation introduit un usage distinct du souvenir individuel. La création reste en réserve car l'idée de cadeau peut susciter une attente d'objet physique que le produit actuel ne satisfait pas.",
+    "risks": [
+      "Ne pas montrer de colis, remise d'affiche imprimée ou emballage cadeau.",
+      "Le partage du fichier est réalisé par l'utilisateur hors de l'outil ; aucune fonction d'envoi au destinataire n'est promise.",
+      "Le GPX doit être fourni par une personne autorisée à l'utiliser ; ne pas inviter à récupérer un trajet privé."
+    ],
+    "status": "draft",
+    "destinationPath": "/discover/trace.html?angle=cadeau"
+  },
+  {
+    "id": "trace-local",
+    "project": "trace",
+    "name": "Trace · La création dans votre navigateur",
+    "angle": "Créer une composition sans envoyer le fichier de parcours ni ouvrir de compte.",
+    "headline": "Votre parcours reste avec vous.",
+    "subheadline": "Créez sans envoyer votre fichier GPX.",
+    "disclosure": "Dans votre navigateur · sans compte",
+    "primaryText": "Importez votre GPX dans Trace, personnalisez la composition et téléchargez votre fichier PNG ou SVG. Le traitement reste dans votre navigateur : aucun compte et aucun envoi de votre parcours. Générateur gratuit ; impression et commande non activées.",
+    "shortHeadline": "Créez sans envoyer votre GPX",
+    "cta": "En savoir plus",
+    "priority": "second",
+    "rationale": "Le fonctionnement local est vérifiable et répond à une objection de confiance. Il accompagne un bénéfice créatif concret ; son influence sur l'usage reste inconnue.",
+    "risks": [
+      "Ne pas étendre cette propriété à une promesse d'anonymat absolu : l'hébergeur peut conserver des journaux techniques.",
+      "Le traitement local ne suffit pas à expliquer ce que produit l'outil : montrer aussi le fichier final.",
+      "Ne pas suggérer un stockage automatique ou une synchronisation du parcours."
+    ],
+    "status": "draft",
+    "destinationPath": "/discover/trace.html?angle=local"
+  },
+  {
+    "id": "dossier-marge",
+    "project": "commerce",
+    "name": "Dossier Commerce · Le coût complet",
+    "angle": "Voir ce qu'il reste après les coûts et identifier les montants encore inconnus.",
+    "headline": "Combien reste-t-il après les frais ?",
+    "subheadline": "Ajoutez produit, port, TVA et coûts.",
+    "disclosure": "Calcul gratuit · hypothèses visibles",
+    "primaryText": "Avant de comparer une offre, regardez le coût complet. Dossier Commerce réunit des exemples documentés et un calcul de marge avec produit, port, TVA, frais et hypothèses d'incidents. Les montants manquants restent visibles. Outil gratuit, sans compte ; aucun produit rentable n'est garanti.",
+    "shortHeadline": "Comparez les coûts complets",
+    "cta": "En savoir plus",
+    "priority": "first",
+    "rationale": "Le besoin est concret, le dossier affiche permet une démonstration immédiate et le calcul peut être expliqué sans formation statistique. Ce choix évalue la clarté du brief, pas sa performance commerciale.",
+    "risks": [
+      "Le calcul dépend du régime fiscal et des coûts renseignés ; il ne découvre pas automatiquement tous les frais.",
+      "Un tableur constitue une alternative gratuite : montrer la liaison entre montants, sources et inconnues.",
+      "Une marge avant acquisition ne constitue pas un bénéfice final ni une preuve de demande."
+    ],
+    "status": "draft",
+    "destinationPath": "/discover/commerce.html?angle=marge"
+  },
+  {
+    "id": "dossier-preuves",
+    "project": "commerce",
+    "name": "Dossier Commerce · Les preuves derrière les chiffres",
+    "angle": "Conserver les références, variantes et hypothèses dans un dossier que l'on peut relire.",
+    "headline": "Gardez les sources de vos chiffres.",
+    "subheadline": "Offres, variantes, dates, dossier exportable.",
+    "disclosure": "Outil gratuit · import local",
+    "primaryText": "Un prix est plus utile quand vous retrouvez sa source et sa variante. Importez une page publique enregistrée ou du JSON-LD, consultez les informations détectées et gardez un dossier exportable avec ses hypothèses. Gratuit et local. Une URL seule ne déclenche aucune analyse du web.",
+    "shortHeadline": "Un dossier que vous pouvez vérifier",
+    "cta": "En savoir plus",
+    "priority": "second",
+    "rationale": "L'angle montre l'intérêt du dossier pour une revue indépendante et parle aux utilisateurs déjà confrontés à plusieurs offres. L'effort d'import peut freiner les débutants : commencer par un exemple.",
+    "risks": [
+      "Une date d'import ne doit pas être présentée comme une vérification récente de la page distante.",
+      "Certaines pages ne fournissent pas de données structurées exploitables ; aucune couverture universelle n'est promise.",
+      "L'outil conserve des preuves et déclarations, sans certifier la fiabilité du fournisseur."
+    ],
+    "status": "draft",
+    "destinationPath": "/discover/commerce.html?angle=preuves"
+  },
+  {
+    "id": "dossier-comparaison",
+    "project": "commerce",
+    "name": "Dossier Commerce · Les pistes et leurs limites",
+    "angle": "Examiner quatre cas documentés et comparer ce qui est établi, comparable ou inconnu.",
+    "headline": "Quatre pistes. Des limites visibles.",
+    "subheadline": "Comparez coûts documentés et inconnues.",
+    "disclosure": "Aucune rentabilité promise · outil gratuit",
+    "primaryText": "Sac de crochet, affiche de parcours, porte-clé, puzzle : explorez quatre études avec leurs sources, coûts connus et conditions manquantes. Dossier Commerce aide à poser une comparaison, gratuitement. Ces cas ne sont ni un classement de produits gagnants ni une prédiction de ventes.",
+    "shortHeadline": "Comparez quatre cas documentés",
+    "cta": "En savoir plus",
+    "priority": "reserve",
+    "rationale": "L'entrée par des cas concrets rend les limites visibles sans exiger de données personnelles. L'intérêt dépend toutefois de ces catégories ; cet angle reste secondaire tant que son utilité au-delà des exemples n'est pas observée.",
+    "risks": [
+      "Quatre dossiers ne constituent pas un index mondial, une liste exhaustive de fournisseurs ou un classement de rentabilité.",
+      "Les produits ne répondent pas tous au même usage : montrer les conditions, sans calculer un faux gagnant universel.",
+      "Les prix doivent garder leur date, leur devise et leur périmètre ; aucun chiffre de ventes concurrentes n'est observé."
+    ],
+    "status": "draft",
+    "destinationPath": "/discover/commerce.html?angle=comparaison"
+  }
+]

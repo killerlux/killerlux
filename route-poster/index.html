@@ -1,50 +1,77 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Transformez votre trace GPX en affiche personnalisée. Création dans votre navigateur, export SVG et PNG gratuit.">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Créez gratuitement une affiche de votre course, trail ou sortie vélo. Import GPX local, trois palettes, exports PNG haute définition et SVG.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; connect-src 'none'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <title>Trace — votre parcours en affiche</title>
-  <link rel="stylesheet" href="./style.css">
+  <title>Trace — votre parcours en affiche</title><link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <header class="topbar"><a href="../index.html" class="back">← Dossier Commerce</a><span class="wordmark">trace<span>.</span></span><span class="topnote">Un souvenir à votre image</span></header>
-  <main aria-busy="true">
+  <a class="skip-link" href="#editor">Aller à l’éditeur</a>
+  <header class="topbar"><a href="../index.html" class="back">← Dossier Commerce</a><a href="#top" class="wordmark" aria-label="Trace, accueil">trace<span>.</span></a><a class="topnote" href="#gpx-help">Trouver mon GPX</a></header>
+  <main aria-busy="true" id="top">
     <noscript><p>Activez JavaScript pour créer votre affiche. Le traitement des fichiers reste local à votre navigateur.</p></noscript>
-    <section class="intro"><p class="eyebrow">DU CHEMIN AU PAPIER</p><h1>Votre parcours,<br><em>au mur.</em></h1><p>Une sortie mémorable. Un chemin à garder.<br>Transformez votre GPX en affiche et emportez le fichier.</p></section>
-    <div class="workspace">
-      <section class="editor" aria-label="Personnaliser l’affiche">
-        <div class="step"><span>01</span><h2>Votre trace</h2></div>
-        <label for="gpx" class="upload"><strong>Importer un fichier GPX <span aria-hidden="true">+</span></strong><small>Jusqu’à 2 Mo · 20 000 points</small><input disabled id="gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml"></label>
-        <p class="privacy">Votre trace reste dans ce navigateur. Aucun envoi, aucun compte.</p>
-        <p id="error" class="error" role="alert" hidden></p>
-        <p id="file-status" class="file-status" aria-live="polite">Chargement de l’éditeur…</p>
-        <p id="loading-help" class="privacy">Si le chargement persiste, <a href="./index.html">rechargez la page</a>.</p>
-        <button disabled id="demo" class="text-button" type="button">Revenir à l’exemple fictif</button>
-        <div class="step"><span>02</span><h2>Votre souvenir</h2></div>
-        <label class="field" for="title">Titre de l’affiche<input disabled id="title" maxlength="64" value="LE CHEMIN PARCOURU" autocomplete="off"></label>
-        <label class="field" for="date">Date <span class="optional">facultative</span><input disabled id="date" type="date" min="1900-01-01" max="2100-12-31"></label>
-        <fieldset><legend>Couleurs</legend><div class="palettes">
-          <label class="palette forest"><input disabled type="radio" name="palette" value="forest" checked><span class="swatch"></span>Forêt</label>
-          <label class="palette midnight"><input disabled type="radio" name="palette" value="midnight"><span class="swatch"></span>Minuit</label>
-          <label class="palette clay"><input disabled type="radio" name="palette" value="clay"><span class="swatch"></span>Argile</label>
-        </div></fieldset>
-        <div class="step"><span>03</span><h2>Votre affiche</h2></div>
-        <div class="downloads"><button disabled id="png" type="button">Télécharger le PNG <span>↓</span></button><button disabled id="svg" class="secondary" type="button">Télécharger le SVG <span>↓</span></button></div>
-        <p class="export-note">Format 30 × 40 cm · PNG 3 543 × 4 724 px<br>SVG vectoriel pour ajuster la création.</p>
-        <p id="download-status" class="file-status" aria-live="polite"></p>
-      </section>
-      <section class="preview-panel" aria-label="Aperçu de votre affiche">
-        <div class="preview-top"><span id="preview-label">EXEMPLE FICTIF</span><span>30 × 40 CM</span></div>
-        <div class="poster-frame"><img id="preview" alt="Affiche de démonstration avec tracé fictif" width="900" height="1200"></div>
-        <dl class="stats"><div><dt>Distance GPS</dt><dd id="distance">—</dd></div><div><dt>Points importés</dt><dd id="points">—</dd></div><div><dt>Segments</dt><dd id="segments">—</dd></div></dl>
-        <p class="preview-note">Distance calculée sur les points GPS, sans relier les segments séparés. Le tracé de l’affiche est simplifié au-delà de 2 000 points.</p>
-      </section>
-    </div>
-    <section class="how"><p class="eyebrow">UNE TRACE, PAS UNE CARTE</p><h2>Le souvenir tient dans la ligne.</h2><p>Exportez votre parcours depuis votre application de randonnée ou de sport au format GPX. Importez-le ici, choisissez une palette et un titre : votre affiche se compose instantanément, sans fond de carte.</p></section>
+    <section class="hero">
+      <div class="intro"><p class="eyebrow">COURSE · TRAIL · VÉLO</p><h1>Ce chemin-là.<br><em>Gardez-le.</em></h1><p>La première course. La sortie qui déborde.<br>Le détour que vous referiez mille fois.<br>Faites de votre parcours une affiche à vous.</p><div class="hero-actions"><a class="button primary" href="#editor">Créer mon affiche gratuitement <span aria-hidden="true">↓</span></a><a class="quiet-link" href="#examples">Voir trois exemples</a></div><p class="hero-detail">Votre fichier GPX reste sur votre appareil.<br>Sans compte · Export PNG et SVG · Format 30 × 40 cm</p></div>
+      <figure class="hero-art"><div class="hero-paper"><img id="hero-poster" alt="Exemple fictif d’une affiche de course, Le Tour des Quais" width="900" height="1200"></div><figcaption>Un tracé fictif pour découvrir le rendu.</figcaption></figure>
+    </section>
+    <section id="examples" class="examples anchor-target" aria-labelledby="examples-title">
+      <div class="section-heading"><div><p class="eyebrow">CHAQUE SORTIE A SA LIGNE</p><h2 id="examples-title">Trois envies de repartir.</h2></div><p>Essayez un exemple, puis importez votre parcours.<br>Ces trois traces sont fictives.</p></div>
+      <div class="example-grid">
+        <button disabled type="button" class="example-card" data-example="run"><span class="example-art"><img id="example-run" alt="Affiche fictive de course : Le Tour des Quais" width="900" height="1200"></span><span class="example-category">COURSE</span><strong>Le Tour des Quais</strong><span class="example-description">Les rues encore calmes. Le fleuve pour repère.</span><span class="example-action">Essayer cet exemple →</span></button>
+        <button disabled type="button" class="example-card" data-example="trail"><span class="example-art"><img id="example-trail" alt="Affiche fictive de trail : Là-haut, les crêtes" width="900" height="1200"></span><span class="example-category">TRAIL</span><strong>Là-haut, les crêtes</strong><span class="example-description">Des lacets, des détours, puis la ligne des crêtes.</span><span class="example-action">Essayer cet exemple →</span></button>
+        <button disabled type="button" class="example-card" data-example="ride"><span class="example-art"><img id="example-ride" alt="Affiche fictive de vélo : La Grande Échappée" width="900" height="1200"></span><span class="example-category">VÉLO</span><strong>La Grande Échappée</strong><span class="example-description">Une journée à tourner les jambes et la tête ailleurs.</span><span class="example-action">Essayer cet exemple →</span></button>
+      </div>
+    </section>
+    <section id="editor" class="creation anchor-target" aria-labelledby="editor-title" tabindex="-1">
+      <div class="section-heading"><div><p class="eyebrow">À VOUS DE TRACER</p><h2 id="editor-title">Votre souvenir prend forme.</h2></div><p>Importez. Personnalisez. Téléchargez.<br>Tout se passe dans votre navigateur.</p></div>
+      <div class="workspace">
+        <section class="editor" aria-label="Personnaliser l’affiche">
+          <div class="step"><span>01</span><h3>Votre parcours</h3></div>
+          <label for="gpx" class="upload"><strong>Importer mon fichier GPX <span aria-hidden="true">+</span></strong><small>Jusqu’à 2 Mo · 20 000 points</small><input disabled id="gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml" aria-describedby="gpx-note"></label>
+          <p class="privacy" id="gpx-note">Aucune donnée GPS n’est envoyée. <a href="#gpx-help">Où trouver mon GPX ?</a></p>
+          <p id="error" class="error" role="alert" hidden></p><p id="file-status" class="file-status" aria-live="polite">Chargement de l’éditeur…</p>
+          <p id="loading-help" class="privacy">Si le chargement persiste, <a href="./index.html">rechargez la page</a>.</p>
+          <button disabled id="demo" class="text-button" type="button">Revenir à l’exemple de course</button>
+          <div class="step"><span>02</span><h3>Votre souvenir</h3></div>
+          <label class="field" for="title">Titre de l’affiche<input disabled id="title" maxlength="64" value="LE TOUR DES QUAIS" autocomplete="off"></label>
+          <label class="field" for="date">Date <span class="optional">facultative</span><input disabled id="date" type="date" min="1900-01-01" max="2100-12-31"></label>
+          <fieldset><legend>Couleurs</legend><div class="palettes">
+            <label class="palette forest"><input disabled type="radio" name="palette" value="forest" checked><span class="swatch"></span>Forêt</label>
+            <label class="palette midnight"><input disabled type="radio" name="palette" value="midnight"><span class="swatch"></span>Minuit</label>
+            <label class="palette clay"><input disabled type="radio" name="palette" value="clay"><span class="swatch"></span>Argile</label>
+          </div></fieldset>
+          <a class="mobile-preview-link" href="#poster-preview">Voir mon aperçu ↓</a>
+          <div class="step"><span>03</span><h3>Emportez votre affiche</h3></div>
+          <div class="downloads"><button disabled id="png" type="button">Télécharger le PNG <span aria-hidden="true">↓</span></button><button disabled id="svg" class="secondary" type="button">Télécharger le SVG <span aria-hidden="true">↓</span></button></div>
+          <p class="export-note"><strong>PNG</strong> : image haute définition, facile à ouvrir.<br><strong>SVG</strong> : fichier vectoriel, modifiable dans un éditeur.<br>Format 30 × 40 cm · PNG 3 543 × 4 724 px</p><p id="download-status" class="file-status" aria-live="polite"></p>
+        </section>
+        <section id="poster-preview" class="preview-panel anchor-target" aria-label="Aperçu de votre affiche">
+          <div class="preview-top"><span id="preview-label">EXEMPLE FICTIF · COURSE</span><span>30 × 40 CM</span></div>
+          <div class="poster-frame"><img id="preview" alt="Affiche de démonstration avec tracé fictif" width="900" height="1200"></div>
+          <dl class="stats"><div><dt>Distance GPS</dt><dd id="distance">—</dd></div><div><dt>Points importés</dt><dd id="points">—</dd></div><div><dt>Segments</dt><dd id="segments">—</dd></div></dl>
+          <p class="preview-note">Distance calculée sur vos points GPS, sans relier les segments séparés. Au-delà de 2 000 points, seul le dessin est simplifié.</p>
+        </section>
+      </div>
+    </section>
+    <section id="gpx-help" class="guidance anchor-target" aria-labelledby="help-title">
+      <p class="eyebrow">VOTRE SORTIE EST DÉJÀ ENREGISTRÉE ?</p><h2 id="help-title">Récupérez sa trace GPX.</h2><p class="guidance-intro">Le GPX est un fichier de coordonnées. Choisissez une sortie avec GPS, téléchargez-la depuis votre application, puis importez le fichier ici. Les menus peuvent varier selon la version.</p>
+      <div class="help-grid">
+        <article><span class="help-number">01</span><h3>Strava, sur le web</h3><p>Ouvrez votre activité, puis le menu <strong>…</strong> et <strong>Exporter GPX</strong>. Une activité sans données GPS ne donnera pas de tracé utilisable.</p><a href="https://support.strava.com/en-us/articles/15401919-how-do-i-export-my-strava-data" target="_blank" rel="noopener noreferrer">Aide officielle Strava</a></article>
+        <article><span class="help-number">02</span><h3>Garmin Connect, sur le web</h3><p><strong>Activités → Toutes les activités</strong>, puis ouvrez le nom de votre sortie. Dans la fiche, roue dentée → <strong>Exporter au format GPX</strong>.</p><a href="https://support.garmin.com/en-US/?faq=W1TvTPW8JZ6LfJSfK512Q8" target="_blank" rel="noopener noreferrer">Aide officielle Garmin</a></article>
+        <article><span class="help-number">03</span><h3>Komoot</h3><p>Dans votre profil, ouvrez un itinéraire enregistré ou une activité terminée, puis <strong>Télécharger le fichier GPX</strong>. La région de départ doit être débloquée.</p><a href="https://support.komoot.com/hc/en-us/articles/10115477099674-Export-and-import-Routes-and-Activities" target="_blank" rel="noopener noreferrer">Aide officielle Komoot</a></article>
+      </div><a class="quiet-link" href="#editor">J’ai mon GPX, je crée mon affiche ↑</a>
+    </section>
+    <section class="faq" aria-labelledby="faq-title"><div><p class="eyebrow">LES PETITES QUESTIONS</p><h2 id="faq-title">Avant de prendre<br>un autre chemin.</h2></div><div class="faq-items">
+      <details><summary>Quels fichiers puis-je importer ?</summary><p>Un fichier <strong>.gpx</strong> contenant un parcours ou une trace GPS : jusqu’à 2 Mo, 20 000 points et 1 000 segments. Les fichiers FIT, TCX, ZIP et les captures d’écran ne sont pas pris en charge. Choisissez l’export GPX dans votre application.</p></details>
+      <details><summary>Mes coordonnées GPS restent-elles privées ?</summary><p>Le fichier est lu uniquement dans votre navigateur. Trace ne l’envoie pas à un serveur et ne l’enregistre pas. Fermer ou recharger la page efface votre création en cours ; téléchargez-la pour la garder. L’affiche exportée montre la forme du parcours, sans fond de carte ni liste de coordonnées. Réfléchissez aux lieux privés avant de partager votre tracé.</p></details>
+      <details><summary>PNG ou SVG : lequel choisir ?</summary><p>Le <strong>PNG</strong> est une image de 3 543 × 4 724 pixels, soit environ 300 pixels par pouce au format 30 × 40 cm. Le <strong>SVG</strong> garde les lignes vectorielles pour modifier ou redimensionner votre création. Les polices du SVG dépendent de l’appareil qui l’ouvre ; le PNG conserve le rendu exporté.</p></details>
+      <details><summary>Puis-je commander une impression ici ?</summary><p>Pas encore. Ce prototype gratuit permet de créer et télécharger votre affiche ; aucune impression ni expédition n’est activée. Pour une impression chez un prestataire de votre choix, vérifiez son gabarit, les marges et le format 30 × 40 cm avant de commander. Le fichier exporté n’est pas un bon à tirer validé par un imprimeur.</p></details>
+      <details><summary>Pourquoi la distance diffère-t-elle de mon application ?</summary><p>Trace additionne les distances entre les points GPS, séparément dans chaque segment. Votre application peut corriger les erreurs GPS, tenir compte du relief ou retirer des pauses. La simplification du dessin ne change pas la distance calculée ici.</p></details>
+      <details><summary>Les trois exemples correspondent-ils à de vraies sorties ?</summary><p>Non. Course, trail et vélo sont des parcours inventés pour montrer le rendu. La mention « tracé fictif » reste visible sur leur aperçu et dans leurs exports. Elle disparaît quand vous importez votre propre GPX.</p></details>
+    </div></section>
   </main>
-  <footer><p>Prototype gratuit — impression et commande non activées.</p><p>Une filière d’impression à la demande est documentée chez <a href="https://www.printapi.io/products/posters" target="_blank" rel="noopener noreferrer">Print API</a> ; l’accès à la production et le fichier final restent à qualifier. <a href="../index.html">Voir l’étude</a>.</p></footer>
+  <footer><a href="#top" class="wordmark" aria-label="Retour en haut">trace<span>.</span></a><p>Prototype gratuit — impression et commande non activées.</p><p>Pour le détail de la recherche et des fournisseurs : <a href="../index.html">Dossier Commerce</a>.</p></footer>
   <script type="module" src="./app.js"></script>
 </body>
 </html>

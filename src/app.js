@@ -11,6 +11,8 @@ const money=(value,currency='EUR')=>value===null||value===undefined?'Inconnu':ne
 const decimal=value=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:2}).format(value);
 const percent=value=>new Intl.NumberFormat('fr-FR',{style:'percent',maximumFractionDigits:1}).format(value);
 const probabilityText=value=>value<0.001?'< 0,1 %':value>0.999?'> 99,9 %':percent(value);
+const displayTime=value=>{if(!value)return'inconnue';const date=new Date(value);return Number.isFinite(date.getTime())?new Intl.DateTimeFormat('fr-FR',{dateStyle:'short',timeStyle:'short',timeZone:'Europe/Paris'}).format(date)+' (Paris)':'inconnue';};
+const variantLabels={size:'Taille',color:'Couleur',material:'Matière',pattern:'Motif',groupName:'Famille'};
 function node(tag,attributes={},...children){const n=document.createElement(tag);for(const [key,value] of Object.entries(attributes)){if(value===null||value===undefined)continue;if(key==='class')n.className=value;else if(key.startsWith('on')&&typeof value==='function')n.addEventListener(key.slice(2),value);else n.setAttribute(key,String(value));}for(const child of children.flat(Infinity)){if(child===null||child===undefined)continue;n.append(child instanceof Node?child:document.createTextNode(String(child)));}return n;}
 function externalLink(url,label,trustedCitation=false){let safe=safeSourceURL(url);if(safe&&trustedCitation){const cited=new URL(safe);cited.search=new URL(url).search;safe=cited.href;}return safe?node('a',{href:safe,target:'_blank',rel:'noopener noreferrer'},label):node('span',{},label+' — URL non exploitable');}
 function label(text,kind='neutral'){return node('span',{class:'label '+kind},text);}
@@ -23,6 +25,8 @@ function setStatus(id,text,isError=false){$(id).textContent=text;$(id).classList
 
 let cases=[],currentCase=null,economics=null,probabilityResult=null,probabilityInput=null,sensitivityResult=null;
 const importsByCase=new Map();
+const DEMO_IMPORT_WARNING='EXEMPLE FICTIF intégré : ces produits et leurs prix sont inventés pour expliquer l’extraction. Aucune source marchande ni demande réelle.';
+const caseShortNames={'crochet':'Sac de crochet','poster-gpx':'Affiche GPX','keytag':'Porte-clé gravé','puzzle-gpx':'Puzzle GPX'};
 const customCase={id:'custom',name:'Votre produit à étudier',category:'Dossier personnel local',summary:'Ajoutez des sources et renseignez les coûts vérifiables de cette offre. Les données ne quittent pas ce navigateur.',decision:'hold',blockers:['Aucune référence fournisseur ni demande établie pour ce dossier.'],supplier:null,competitors:[],sources:[],scenario:{salePrice:null,cost:null,costIsVerified:false,vatRate:20}};
 const economicIds=['sale-price','vat-mode','vat-rate','landed-cost','payment-rate','payment-fixed','return-reserve','fixed-allocation','desired-profit','assumed-cpc'];
 const economicKeys=['price','vatMode','vatRate','landedCost','paymentRate','paymentFixed','returnReserve','fixedAllocation','desiredProfit','assumedCpc'];
@@ -30,23 +34,49 @@ const economicLabels={price:'prix total',vatMode:'régime de TVA',vatRate:'taux 
 function readEconomics(){return Object.fromEntries(economicKeys.map((key,i)=>[key,selectedField(economicIds[i])]));}
 function imports(){return importsByCase.get(currentCase?.id)||[];}
 function sourceLinks(ids){return (ids||[]).map(id=>currentCase.sources.find(s=>s.id===id)).filter(Boolean).map(s=>externalLink(s.url,s.label,true));}
-function switchPanel(name){for(const button of document.querySelectorAll('.tab')){const active=button.dataset.panel===name;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');}for(const section of document.querySelectorAll('.panel-view'))section.hidden=section.id!=='panel-'+name;}
+function switchPanel(name){if(!['evidence','economics','probability','sources'].includes(name))return;for(const button of document.querySelectorAll('.tab')){const active=button.dataset.panel===name;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');}for(const section of document.querySelectorAll('.panel-view'))section.hidden=section.id!=='panel-'+name;}
+function scrollToSection(section){if(!section)return;section.scrollIntoView({block:'start'});const heading=section.querySelector('h2,h3');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}}
+function followFragment(){
+  const fragment=location.hash.slice(1);
+  if(['evidence','economics','probability','sources'].includes(fragment)){switchPanel(fragment);requestAnimationFrame(()=>scrollToSection($('panel-'+fragment)));}
+  else if(fragment==='workspace'||fragment==='compare'){requestAnimationFrame(()=>scrollToSection($(fragment)));}
+  else if(fragment==='try-import'){switchPanel('evidence');requestAnimationFrame(()=>{$('try-import').scrollIntoView({block:'center'});$('load-import-example').focus({preventScroll:true});});}
+}
+function selectCase(id,{scroll=false}={}){
+  const next=id==='custom'?customCase:cases.find(c=>c.id===id);if(!next)return;
+  if(currentCase?.id!==next.id){currentCase=next;$('case-picker').value=next.id;renderCase();setStatus('global-status','Dossier changé. Les paramètres économiques de référence et le formulaire statistique ont été réinitialisés. Les relevés de chaque dossier restent séparés.');}
+  if(scroll){switchPanel('evidence');history.replaceState(null,'','#workspace');scrollToSection($('workspace'));}
+}
+function renderComparison(){
+  $('case-comparison-grid').replaceChildren(...cases.map(c=>{
+    const known=c.scenario.costIsVerified&&c.scenario.cost!==null;
+    const selected=c.id===currentCase?.id;
+    return node('article',{class:'comparison-card'+(selected?' selected':''),'data-case-id':c.id},node('div',{class:'comparison-card-top'},node('h3',{},caseShortNames[c.id]||c.name),label(known?'Coût documenté':'Coût incomplet',known?'fact':'hold')),node('p',{class:'comparison-price'},known?money(c.scenario.cost,c.supplier.currency):'Inconnu',known?node('span',{},c.supplier.costBasis+' · indicatif'):null),node('p',{class:'comparison-detail'},'Coût livré France'),node('dl',{},row('Automatisation',c.supplier.personalizationAutomation==='documented'?'API documentée':c.supplier.personalizationAutomation==='manual'?'Étape manuelle':'À vérifier'),row('Sources',c.sources.length)),node('p',{class:'comparison-gap'},c.id==='poster-gpx'?'Compte live et qualité à qualifier.':c.id==='puzzle-gpx'?'Production UK ; total livré inconnu.':c.id==='keytag'?'Port et exécution à vérifier.':'Fournisseur livré non qualifié.'),node('button',{class:'button small',type:'button','aria-pressed':String(selected),onclick:()=>selectCase(c.id,{scroll:true})},selected?'Dossier ouvert':'Examiner la piste'));
+  }));
+}
+
+function supplierOffer(c){
+  const s=c.supplier,known=c.scenario.costIsVerified&&c.scenario.cost!==null;
+  const basis=s.costBasis==='unknown'?'base fiscale inconnue':s.costBasis;
+  const costs=node('dl',{class:'supplier-costs'},row('Produit seul',s.productCost===null?'Inconnu':money(s.productCost,s.currency)+' '+basis),row('Port France',s.shippingCost===null?'Inconnu':money(s.shippingCost,s.currency)+' '+basis),s.handlingCost===undefined?null:row('Traitement',money(s.handlingCost,s.currency)+' '+basis));
+  return node('article',{class:'offer supplier-offer'},node('div',{class:'offer-heading'},node('div',{},node('h4',{},s.name),node('p',{},'Coût livré France · une unité')),node('div',{class:'supplier-total'},node('strong',{},known?money(c.scenario.cost,s.currency):'Inconnu'),node('small',{},known?basis+' · indicatif':'Port ou produit à chiffrer'))),node('p',{},s.sku||'Référence non confirmée'),costs,node('div',{class:'badges'},label('Fournisseur'),label(s.personalizationAutomation==='manual'?'Personnalisation manuelle':s.personalizationAutomation==='documented'?'API documentée':'Automatisation à vérifier','hold')),node('p',{},s.label),node('p',{},'Origine : '+s.fulfillmentOrigin),node('details',{class:'method supplier-sources'},node('summary',{},'Voir les '+s.sourceIds.length+' sources fournisseur'),node('div',{class:'stack'},sourceLinks(s.sourceIds))));
+}
 
 function renderCase(){
   const c=currentCase;
   $('economics-form').reset();
   $('source-file').value='';$('source-content').value='';$('source-url').value='';
   setStatus('import-status',imports().length?imports().length+' relevé(s) déjà présent(s) dans ce dossier.':'Aucun fichier n’a été analysé dans ce dossier.');
-  $('case-overview').replaceChildren(node('div',{class:'case-banner'},node('div',{},node('h3',{},c.name),node('p',{},c.summary),c.id==='poster-gpx'?node('p',{},node('a',{href:'./route-poster/index.html'},'Essayer Trace : créer une affiche GPX gratuitement →')):null,node('div',{class:'blockers'},c.blockers.map(t=>node('span',{},t)))),label('Lancement non validé','hold')));
+  $('case-overview').replaceChildren(node('div',{class:'case-banner'},node('div',{},node('h3',{},c.name),node('p',{},c.summary),c.id==='poster-gpx'?node('p',{class:'case-demo-link'},node('a',{href:'./route-poster/index.html'},'Essayer Trace : créer une affiche GPX gratuitement →')):null,node('details',{class:'case-blockers'},node('summary',{},'Ce qui reste à vérifier ('+c.blockers.length+')'),node('ul',{},c.blockers.map(t=>node('li',{},t))))),label('Lancement non validé','hold')));
   $('sale-price').value=c.scenario.salePrice??'';$('landed-cost').value=c.scenario.cost??'';$('vat-mode').value='collect';$('vat-rate').value=c.scenario.vatRate??20;
   $('cost-provenance').textContent=c.scenario.costIsVerified?'Coût catalogue documenté · autres hypothèses':'Coût livré non documenté';
   $('cost-provenance').className='label '+(c.scenario.costIsVerified?'fact':'missing');
   const offers=[];
-  if(c.supplier){const s=c.supplier;offers.push(node('article',{class:'offer'},node('div',{class:'offer-heading'},node('h4',{},s.name),node('span',{class:'offer-price'},s.productCost===null?'Prix inconnu':money(s.productCost,s.currency))),node('p',{},s.sku||'Référence non confirmée'),node('div',{class:'badges'},label('Fournisseur'),label(s.costBasis==='unknown'?'Base fiscale inconnue':s.costBasis),label(s.personalizationAutomation==='manual'?'Personnalisation manuelle':s.personalizationAutomation==='documented'?'Fonction documentée':'Automatisation à vérifier','hold')),node('p',{},s.label),node('p',{},'Port France : '+(s.shippingCost===null?'inconnu':money(s.shippingCost,s.currency))+(s.handlingCost===undefined?'':' · traitement : '+money(s.handlingCost,s.currency))+' · origine : '+s.fulfillmentOrigin),node('div',{class:'stack'},sourceLinks(s.sourceIds))));}
-  for(const o of c.competitors)offers.push(node('article',{class:'offer'},node('div',{class:'offer-heading'},node('h4',{},o.name),node('span',{class:'offer-price'},money(o.price,o.currency))),node('p',{},o.sku),node('div',{class:'badges'},label('Concurrent'),label(o.shippingIncluded===true?'Port annoncé inclus':o.shippingIncluded===false?'Prix hors port':'Port à vérifier'),o.available===false?label('Épuisé au relevé','hold'):null),node('div',{class:'stack'},sourceLinks(o.sourceIds))));
+  if(c.supplier)offers.push(supplierOffer(c));
+  for(const o of c.competitors)offers.push(node('article',{class:'offer competitor-offer'},node('div',{class:'offer-heading'},node('h4',{},o.name),node('span',{class:'offer-price'},money(o.price,o.currency))),node('p',{},o.sku),node('div',{class:'badges'},label('Prix public concurrent'),label(o.shippingIncluded===true?'Port annoncé inclus':o.shippingIncluded===false?'Prix hors port':'Port à vérifier'),o.available===false?label('Épuisé au relevé','hold'):null),node('p',{class:'comparison-caution'},'Vérifier la base HT/TTC et le format dans la source.'),node('div',{class:'stack'},sourceLinks(o.sourceIds))));
   $('observed-offers').replaceChildren(...(offers.length?offers:[empty('Dossier vierge','Importez un relevé de page publique pour commencer.')]));
   $('evidence-count').textContent=String(c.sources.length+imports().length);
-  resetProbability();renderImports();updateEconomics();
+  resetProbability();renderImports();updateEconomics();renderComparison();
 }
 
 function updateEconomics(event){
@@ -103,21 +133,22 @@ function renderImports(){
   const cards=[];
   for(const [index,record] of imports().entries()){
     const r=record.result;
+    const demonstration=r.warnings.includes(DEMO_IMPORT_WARNING);
     const sourceText=r.source.url||'URL non renseignée';
     const header=node('div',{class:'offer-heading'},node('h3',{},'Relevé local '+(index+1)),node('button',{class:'button small',type:'button',onclick:()=>{imports().splice(index,1);renderImports();}},'Retirer'));
     const sourceRow=node('p',{class:'help'},r.source.url?externalLink(r.source.url,sourceText):sourceText,' · vérification en direct : non');
-    const time=node('p',{class:'help'},'Capture déclarée : '+(r.source.captureTime||'inconnue')+' · import : '+r.source.importTime);
+    const time=node('p',{class:'help'},'Capture déclarée : '+displayTime(r.source.captureTime)+' · import : '+displayTime(r.source.importTime));
     const offers=r.candidates.map(candidate=>{
       const p=candidate.product,o=candidate.offer;
       const exactPrice=o.price!==null&&o.currency?money(o.price,o.currency):o.kind==='AggregateOffer'?'Fourchette':'Prix inconnu';
       const evidence=node('details',{class:'method'},node('summary',{},'Provenance des champs'),node('ul',{},candidate.evidence.map(v=>node('li',{class:'code'},v.field+' ← '+v.path+' : '+String(v.rawValue)))));
-      const variant=p.variant?Object.entries(p.variant).map(([k,v])=>k+' : '+v).join(' · '):'Variante non décrite';
+      const variant=p.variant?Object.entries(p.variant).map(([k,v])=>(Object.hasOwn(variantLabels,k)?variantLabels[k]:k)+' : '+v).join(' · '):'Variante non décrite';
       const role=node('select',{'aria-label':'Rôle de '+(p.name||'l’offre'),onchange:e=>{candidate.product.role=e.target.value;}},node('option',{value:'unclassified'},'Rôle à préciser'),node('option',{value:'supplier'},'Piste fournisseur'),node('option',{value:'competitor'},'Offre concurrente'));
       role.value=p.role;
-      const content=node('article',{class:'offer'},node('div',{class:'offer-heading'},node('h4',{},p.name||'Produit sans nom'),node('span',{class:'offer-price'},exactPrice)),node('p',{},variant),node('p',{},'SKU : '+(p.sku||'inconnu')+' · GTIN : '+(p.gtin||'inconnu')),node('div',{class:'badges'},label(o.kind),label(o.currency||'Devise inconnue'),label('Port / TVA non établis','hold')),o.kind==='AggregateOffer'?node('p',{},'Minimum publié : '+(o.priceLow??'inconnu')+' · maximum : '+(o.priceHigh??'inconnu')+' '+(o.currency||'')):null,role,node('ul',{class:'warning-list'},candidate.warnings.map(w=>node('li',{},w))),evidence);
+      const content=node('article',{class:'offer'},node('div',{class:'offer-heading'},node('h4',{},p.name||'Produit sans nom'),node('span',{class:'offer-price'},exactPrice)),node('p',{},variant),node('p',{},'SKU : '+(p.sku||'inconnu')+' · GTIN : '+(p.gtin||'inconnu')),node('div',{class:'badges'},label(o.kind==='AggregateOffer'?'Fourchette de prix':'Offre'),label(o.currency||'Devise inconnue'),label('Port / TVA non établis','hold')),o.kind==='AggregateOffer'?node('p',{},'Minimum publié : '+(o.priceLow??'inconnu')+' · maximum : '+(o.priceHigh??'inconnu')+' '+(o.currency||'')):null,role,node('ul',{class:'warning-list'},candidate.warnings.map(w=>node('li',{},w))),evidence);
       return content;
     });
-    cards.push(node('div',{class:'card'},header,sourceRow,time,...offers,node('ul',{class:'warning-list'},r.warnings.map(w=>node('li',{},w)))));
+    cards.push(node('div',{class:'card'},header,demonstration?notice('Fiche fictive — essai intégré','Les noms et prix sont inventés. Cette fiche n’est pas une preuve fournisseur et ne modifie aucun calcul.','warning'):null,sourceRow,time,...offers,node('ul',{class:'warning-list'},r.warnings.map(w=>node('li',{},w)))));
   }
   $('extracted-offers').replaceChildren(...cards);
   $('evidence-count').textContent=String((currentCase?.sources.length||0)+imports().length);
@@ -128,12 +159,15 @@ function renderSources(){
   const cards=currentCase.sources.map(s=>node('article',{class:'card source-card'},node('div',{},node('h3',{},s.label),node('p',{},s.fact),externalLink(s.url,s.url,true)),node('span',{class:'date'},'Relevé : '+s.checkedAt)));
   for(const [i,record] of imports().entries()){
     const s=record.result.source;
-    cards.push(node('article',{class:'card source-card'},node('div',{},node('h3',{},'Relevé importé '+(i+1)),node('p',{},'Données fournies localement ; source et date déclarées, sans vérification en direct.'),s.url?externalLink(s.url,s.url):node('p',{},'URL d’origine inconnue'),node('p',{},'Capture : '+(s.captureTime||'inconnue')+' · import : '+s.importTime),s.sha256?node('details',{class:'method'},node('summary',{},'Empreinte du fichier importé'),node('p',{class:'code'},s.sha256),node('p',{},'Cette empreinte identifie le fichier ; elle ne prouve pas son authenticité.')):null),label('Source importée','neutral')));
+    const demonstration=record.result.warnings.includes(DEMO_IMPORT_WARNING);
+    cards.push(node('article',{class:'card source-card'},node('div',{},node('h3',{},demonstration?'Exemple fictif intégré':'Relevé importé '+(i+1)),node('p',{},demonstration?DEMO_IMPORT_WARNING:'Données fournies localement ; source et date déclarées, sans vérification en direct.'),s.url?externalLink(s.url,s.url):node('p',{},demonstration?'Aucune source marchande : données inventées.':'URL d’origine inconnue'),node('p',{},'Capture : '+displayTime(s.captureTime)+' · import : '+displayTime(s.importTime)),s.sha256?node('details',{class:'method'},node('summary',{},'Empreinte du fichier importé'),node('p',{class:'code'},s.sha256),node('p',{},'Cette empreinte identifie le fichier ; elle ne prouve pas son authenticité.')):null),label(demonstration?'Fictif':'Source importée',demonstration?'hold':'neutral')));
   }
   $('case-sources').replaceChildren(...(cards.length?cards:[empty('Aucune source pour ce dossier','Ajoutez une page enregistrée à l’étape 1. Son origine déclarée figurera ici et dans l’export.')]));
 }
 
 async function importSource(){
+  if(!currentCase)return;
+  const startedCase=currentCase.id;
   const button=$('extract-button');button.disabled=true;
   try{
     const file=$('source-file').files[0];let content=$('source-content').value;
@@ -143,11 +177,38 @@ async function importSource(){
     const source=$('source-url').value.trim();
     if(source&&!safeSourceURL(source))throw new Error('L’URL de référence doit utiliser HTTP ou HTTPS.');
     const result=await extractOffers(content,{sourceUrl:source||undefined,format:'auto'});
+    if(currentCase.id!==startedCase)throw new Error('Le dossier a changé pendant la lecture. Aucun relevé ajouté ; relancez l’import dans le dossier souhaité.');
     if(!importsByCase.has(currentCase.id))importsByCase.set(currentCase.id,[]);
     const records=imports();if(records.length>=8)throw new Error('Ce dossier contient déjà huit relevés. Exportez-le ou retirez un relevé avant de continuer.');
     records.push({result,filename:file?.name||null});renderImports();
     setStatus('import-status',result.candidates.length+' offre(s) relevée(s). Vérifiez la variante, la devise et les conditions. Aucun prix n’a été injecté automatiquement dans les calculs.');
   }catch(error){setStatus('import-status',error.message||'Ce fichier n’a pas pu être lu.',true);}finally{button.disabled=false;}
+}
+
+async function loadImportExample(){
+  if(!currentCase)return;
+  const button=$('load-import-example');button.disabled=true;
+  selectCase('custom');switchPanel('evidence');
+  try{
+    const records=importsByCase.get('custom')||[];
+    if(!records.some(record=>record.result.warnings.includes(DEMO_IMPORT_WARNING))){
+      if(records.length>=8)throw new Error('Le dossier personnel contient déjà huit relevés. Retirez-en un avant d’ajouter la fiche fictive.');
+      const fixture={'@type':'ProductGroup',name:'EXEMPLE FICTIF — sac de projet',hasVariant:[
+        {'@type':'Product',name:'EXEMPLE FICTIF — sac compact',sku:'DEMO-S',size:'Compact',offers:{'@type':'Offer',price:'12.50',priceCurrency:'EUR'}},
+        {'@type':'Product',name:'EXEMPLE FICTIF — sac grand format',sku:'DEMO-L',size:'Grand',offers:{'@type':'Offer',price:'16.90',priceCurrency:'EUR'}}
+      ]};
+      const result=await extractOffers(JSON.stringify(fixture),{format:'json'});
+      if(currentCase.id!=='custom')throw new Error('Le dossier a changé. Aucun exemple ajouté ; réessayez lorsque vous êtes prêt.');
+      const latestRecords=importsByCase.get('custom')||[];
+      if(latestRecords.length>=8)throw new Error('Le dossier personnel contient déjà huit relevés. Aucun exemple ajouté.');
+      result.warnings.unshift(DEMO_IMPORT_WARNING);
+      latestRecords.push({result,filename:null});importsByCase.set('custom',latestRecords);
+    }
+    renderImports();
+    setStatus('import-status','Exemple fictif : deux variantes séparées. Port et TVA restent inconnus ; les calculs ne sont pas remplis.');
+    setStatus('global-status','Fiche fictive ouverte dans le dossier personnel. Les quatre dossiers documentés restent séparés.');
+    history.replaceState(null,'','#evidence');scrollToSection($('extracted-offers'));
+  }catch(error){setStatus('import-status',error.message||'L’exemple n’a pas pu être chargé.',true);}finally{button.disabled=false;}
 }
 
 function exportProject(){
@@ -198,11 +259,19 @@ async function initialize(){
     $('case-count').textContent=String(cases.length);$('case-picker').replaceChildren(...cases.map(c=>node('option',{value:c.id},c.name)),node('option',{value:customCase.id},'＋ Votre propre produit'));
     currentCase=cases.find(c=>c.id==='poster-gpx')||cases[0];$('case-picker').value=currentCase.id;
     renderCase();setupCollector();
+    const poster=cases.find(c=>c.id==='poster-gpx');
+    if(poster){$('hero-product-cost').textContent=money(poster.supplier.productCost,poster.supplier.currency)+' HT';$('hero-landed-cost').textContent=money(poster.scenario.cost,poster.supplier.currency);}
+    for(const id of ['case-picker','restore-project','export-project','extract-button','load-import-example','open-poster-case'])$(id).disabled=false;
+    followFragment();
   }catch(error){$('case-overview').replaceChildren(notice('Les dossiers n’ont pas pu être chargés.','Ce site doit être servi en HTTP ou HTTPS. Réessayez depuis son adresse publiée.','error'));setStatus('global-status','Chargement incomplet : '+error.message,true);$('export-project').disabled=true;$('extract-button').disabled=true;}
 }
 
-for(const button of document.querySelectorAll('.tab'))button.addEventListener('click',()=>switchPanel(button.dataset.panel));
-$('case-picker').addEventListener('change',()=>{currentCase=$('case-picker').value==='custom'?customCase:cases.find(c=>c.id===$('case-picker').value);renderCase();setStatus('global-status','Dossier changé. Les paramètres économiques de référence et le formulaire statistique ont été réinitialisés.');});
+for(const button of document.querySelectorAll('.tab'))button.addEventListener('click',()=>{switchPanel(button.dataset.panel);history.replaceState(null,'','#'+button.dataset.panel);});
+$('case-picker').addEventListener('change',()=>selectCase($('case-picker').value));
+$('open-poster-case').addEventListener('click',()=>selectCase('poster-gpx',{scroll:true}));
+$('load-import-example').addEventListener('click',loadImportExample);
+window.addEventListener('hashchange',followFragment);
+for(const link of document.querySelectorAll('a[href^="#"]'))link.addEventListener('click',event=>{const hash=link.getAttribute('href');if(!['#workspace','#compare','#try-import','#evidence','#economics','#probability','#sources'].includes(hash))return;event.preventDefault();if(location.hash!==hash)history.pushState(null,'',hash);followFragment();});
 $('economics-form').addEventListener('submit',e=>e.preventDefault());$('economics-form').addEventListener('input',updateEconomics);$('economics-form').addEventListener('change',updateEconomics);
 $('probability-form').addEventListener('submit',calculateProbability);$('probability-form').addEventListener('input',invalidateProbability);$('probability-form').addEventListener('change',()=>{$('scenario-warning').hidden=$('probability-mode').value!=='scenario';invalidateProbability();});
 $('load-teaching-example').addEventListener('click',loadTeachingExample);$('extract-button').addEventListener('click',importSource);

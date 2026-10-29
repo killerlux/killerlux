@@ -6,7 +6,7 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -37,7 +37,7 @@ class AppTests(unittest.TestCase):
         self.page.on('pageerror', lambda e:self.errors.append(str(e)))
         self.page.on('request', lambda r:self.external_requests.append(r.url) if not r.url.startswith(self.base) and not r.url.startswith('data:') else None)
         self.page.goto(self.base, wait_until='networkidle')
-        self.page.wait_for_function("document.querySelector('#case-picker').value === 'poster-gpx'")
+        expect(self.page.locator('#case-picker')).to_have_value('poster-gpx')
 
     def tearDown(self):
         self.assertEqual(self.errors, [])
@@ -104,7 +104,7 @@ class AppTests(unittest.TestCase):
             {'@type':'Product','name':'Sac large','size':'L','sku':'L1','offers':{'@type':'Offer','price':'16.90','priceCurrency':'EUR'}}]}
         self.page.locator('#source-content').fill(json.dumps(fixture))
         self.page.locator('#extract-button').click()
-        self.page.wait_for_function("document.querySelector('#import-status').textContent.startsWith('2 offre')")
+        expect(self.page.locator('#import-status')).to_contain_text('2 offre')
         self.assertEqual(self.page.locator('#extracted-offers article.offer').count(), 2)
         self.assertEqual(self.page.locator('#extracted-offers img').count(), 0)
         self.assertEqual(self.page.locator('#landed-cost').input_value(), '')
@@ -139,7 +139,7 @@ class AppTests(unittest.TestCase):
         exported['study']['name']='GUARANTEED_WINNER'
         self.page.locator('#case-picker').select_option('crochet')
         self.page.locator('#project-file').set_input_files({'name':'restore.json','mimeType':'application/json','buffer':json.dumps(exported).encode()})
-        self.page.wait_for_function("document.querySelector('#case-picker').value === 'poster-gpx'")
+        expect(self.page.locator('#case-picker')).to_have_value('poster-gpx')
         self.assertNotIn('GUARANTEED_WINNER',self.page.locator('#case-overview').inner_text())
         self.assertIn('Dossier restauré',self.page.locator('#case-overview').inner_text())
         self.assertEqual(self.page.locator('#landed-cost').input_value(),'14.95')
@@ -151,23 +151,85 @@ class AppTests(unittest.TestCase):
 
     def test_invalid_project_does_not_replace_the_current_work(self):
         self.page.locator('#project-file').set_input_files({'name':'bad.json','mimeType':'application/json','buffer':b'{"tool":"wrong"}'})
-        self.page.wait_for_function("document.querySelector('#global-status').textContent.includes('Reprise impossible')")
+        expect(self.page.locator('#global-status')).to_contain_text('Reprise impossible')
         self.assertEqual(self.page.locator('#case-picker').input_value(),'poster-gpx')
         self.assertEqual(self.page.locator('#landed-cost').input_value(),'14.95')
 
     def test_rejects_oversized_import_without_processing(self):
         self.page.locator('#source-file').set_input_files({'name':'huge.json','mimeType':'application/json','buffer':b' '*2_000_001})
         self.page.locator('#extract-button').click()
-        self.page.wait_for_function("document.querySelector('#import-status').textContent.includes('2 Mo')")
+        expect(self.page.locator('#import-status')).to_contain_text('2 Mo')
         self.assertEqual(self.page.locator('#extracted-offers .card').count(), 0)
 
     def test_mobile_has_no_document_overflow_and_controls_remain_reachable(self):
-        self.page.set_viewport_size({'width':379,'height':844})
-        for name in ('evidence','economics','probability','sources'):
-            self.tab(name)
-            sizes=self.page.evaluate('({doc:document.documentElement.scrollWidth,view:innerWidth})')
-            self.assertLessEqual(sizes['doc'],sizes['view'])
+        for width in (320,379,768):
+            self.page.set_viewport_size({'width':width,'height':844})
+            for name in ('evidence','economics','probability','sources'):
+                self.tab(name)
+                sizes=self.page.evaluate('({doc:document.documentElement.scrollWidth,view:innerWidth})')
+                self.assertLessEqual(sizes['doc'],sizes['view'])
         self.assertTrue(self.page.locator('#export-project').is_visible())
+
+    def test_comparison_distinguishes_delivered_cost_from_product_price(self):
+        self.assertEqual(self.page.locator('.comparison-card').count(),4)
+        poster=self.page.locator('[data-case-id="poster-gpx"]')
+        self.assertIn('14,95',poster.locator('.comparison-price').inner_text())
+        self.assertIn('HT',poster.locator('.comparison-price').inner_text())
+        supplier=self.page.locator('.supplier-offer')
+        self.assertIn('14,95',supplier.locator('.supplier-total').inner_text())
+        self.assertIn('3,80',supplier.locator('.supplier-costs').inner_text())
+        self.assertIn('10,75',supplier.locator('.supplier-costs').inner_text())
+        self.assertIn('0,40',supplier.locator('.supplier-costs').inner_text())
+        for case_id in ('crochet','keytag','puzzle-gpx'):
+            self.assertEqual(self.page.locator(f'[data-case-id="{case_id}"] .comparison-price').inner_text(),'Inconnu')
+        self.page.locator('[data-case-id="crochet"] button').click()
+        expect(self.page.locator('#case-picker')).to_have_value('crochet')
+        self.assertEqual(self.page.locator('#landed-cost').input_value(),'')
+        self.assertIn('Inconnu',self.page.locator('.supplier-total').inner_text())
+
+    def test_campaign_fragments_open_panels_without_resetting_inputs(self):
+        self.page.goto(self.base+'/index.html?utm_source=test&utm_campaign=costs#economics',wait_until='networkidle')
+        expect(self.page.locator('#panel-economics')).to_be_visible()
+        self.page.locator('#sale-price').fill('44')
+        self.page.locator('.economics-guide a[href="#sources"]').focus()
+        self.page.keyboard.press('Enter')
+        expect(self.page.locator('#panel-sources')).to_be_visible()
+        self.assertEqual(self.page.locator('#sale-price').input_value(),'44')
+        self.assertIn('utm_campaign=costs',self.page.url)
+        self.page.go_back()
+        expect(self.page.locator('#panel-economics')).to_be_visible()
+        self.assertEqual(self.page.locator('#sale-price').input_value(),'44')
+        self.page.locator('a[href="#compare"]').click()
+        self.assertEqual(self.page.locator('#sale-price').input_value(),'44')
+        self.page.locator('a[href="#economics"]').click()
+        expect(self.page.locator('#panel-economics')).to_be_visible()
+        self.assertEqual(self.page.locator('#sale-price').input_value(),'44')
+
+    def test_fictitious_import_is_separate_and_stays_fictitious_after_export_and_restore(self):
+        self.page.locator('#load-import-example').click()
+        expect(self.page.locator('#case-picker')).to_have_value('custom')
+        expect(self.page.locator('#import-status')).to_contain_text('Exemple fictif')
+        self.assertEqual(self.page.locator('#extracted-offers article.offer').count(),2)
+        self.assertEqual(self.page.locator('#landed-cost').input_value(),'')
+        self.assertEqual(self.page.locator('#sale-price').input_value(),'')
+        self.assertIn('Fiche fictive',self.page.locator('#extracted-offers').inner_text())
+        self.page.locator('#load-import-example').click()
+        expect(self.page.locator('#load-import-example')).to_be_enabled()
+        exported=self.export()
+        self.assertEqual(len(exported['imports']),1)
+        self.assertEqual(exported['economics']['status'],'incomplete')
+        self.assertIsNone(exported['imports'][0]['source']['url'])
+        self.assertTrue(any('EXEMPLE FICTIF' in warning for warning in exported['imports'][0]['warnings']))
+        self.assertTrue(all('EXEMPLE FICTIF' in candidate['product']['name'] for candidate in exported['imports'][0]['candidates']))
+        self.page.locator('#case-picker').select_option('poster-gpx')
+        self.assertEqual(len(self.export()['imports']),0)
+        self.assertEqual(self.page.locator('#landed-cost').input_value(),'14.95')
+        self.page.locator('#project-file').set_input_files({'name':'example.json','mimeType':'application/json','buffer':json.dumps(exported).encode()})
+        expect(self.page.locator('#case-picker')).to_have_value('custom')
+        self.assertIn('Fiche fictive',self.page.locator('#extracted-offers').inner_text())
+        self.tab('sources')
+        self.assertIn('Exemple fictif intégré',self.page.locator('#case-sources').inner_text())
+        self.assertEqual(self.page.locator('.probability-number').count(),0)
 
 if __name__=='__main__':
     unittest.main(verbosity=2)
