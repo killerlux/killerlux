@@ -55,3 +55,7 @@ byId('png').addEventListener('click', async () => {
   finally { button.disabled = false; }
 });
 render();
+byId('file-status').textContent = 'Tracé fictif de démonstration';
+byId('loading-help').hidden = true;
+document.querySelectorAll('input, button').forEach(control => { control.disabled = false; });
+document.querySelector('main').setAttribute('aria-busy', 'false');

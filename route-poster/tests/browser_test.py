@@ -11,7 +11,7 @@ from threading import Thread
 import json
 import struct
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -28,6 +28,14 @@ def main():
     try:
         with sync_playwright() as playwright, TemporaryDirectory() as temporary:
             browser = playwright.chromium.launch(executable_path="/usr/bin/chromium", headless=True, args=["--no-sandbox"])
+            loading = browser.new_page()
+            loading.route('**/route-poster/app.js', lambda route: route.abort())
+            loading.goto(f"http://127.0.0.1:{server.server_port}/route-poster/index.html")
+            expect(loading.locator('#gpx')).to_be_disabled()
+            expect(loading.locator('#png')).to_be_disabled()
+            expect(loading.locator('#file-status')).to_have_text('Chargement de l’éditeur…')
+            loading.close()
+            checks.append("imports and exports remain disabled until the editor module is ready")
             page = browser.new_page(viewport={"width": 1280, "height": 1000}, accept_downloads=True)
             errors, requests = [], []
             page.on("pageerror", lambda error: errors.append(str(error)))
@@ -36,6 +44,8 @@ def main():
             page.wait_for_function("() => document.querySelector('#preview').complete && document.querySelector('#preview').naturalWidth > 0")
             assert page.locator("#preview-label").inner_text() == "EXEMPLE FICTIF"
             assert "Prototype gratuit" in page.locator("footer").inner_text()
+            expect(page.locator('#gpx')).to_be_enabled()
+            expect(page.locator('#png')).to_be_enabled()
             checks.append("initial preview and explicit fictitious sample")
 
             result = page.evaluate("""async () => {

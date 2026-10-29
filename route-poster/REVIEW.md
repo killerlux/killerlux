@@ -12,6 +12,7 @@ Le test lance un serveur HTTP temporaire sur `127.0.0.1`, puis le ferme. Les exp
 
 Contrôles réalisés :
 
+- Import et export désactivés tant que le module n'est pas prêt : le chargement lent ne peut plus perdre silencieusement un premier import. Un module bloqué conserve les commandes désactivées ; l'initialisation normale les active.
 - Haversine : un degré de longitude à l’équateur ≈ 111,195 km ; aucun pont de distance entre deux segments éloignés.
 - GPX avec espace de noms et routes `rte`, coordonnées bornées et finies, rejet XML malformé, DOCTYPE/ENTITY, fichier >2 Mo et >20 000 points.
 - Passage de l’antiméridien : trajet 179,9° → −179,9° ≈ 22,24 km, projection finie.

@@ -10,26 +10,28 @@
 </head>
 <body>
   <header class="topbar"><a href="../index.html" class="back">← Dossier Commerce</a><span class="wordmark">trace<span>.</span></span><span class="topnote">Un souvenir à votre image</span></header>
-  <main>
+  <main aria-busy="true">
+    <noscript><p>Activez JavaScript pour créer votre affiche. Le traitement des fichiers reste local à votre navigateur.</p></noscript>
     <section class="intro"><p class="eyebrow">DU CHEMIN AU PAPIER</p><h1>Votre parcours,<br><em>au mur.</em></h1><p>Une sortie mémorable. Un chemin à garder.<br>Transformez votre GPX en affiche et emportez le fichier.</p></section>
     <div class="workspace">
       <section class="editor" aria-label="Personnaliser l’affiche">
         <div class="step"><span>01</span><h2>Votre trace</h2></div>
-        <label for="gpx" class="upload"><strong>Importer un fichier GPX <span aria-hidden="true">+</span></strong><small>Jusqu’à 2 Mo · 20 000 points</small><input id="gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml"></label>
+        <label for="gpx" class="upload"><strong>Importer un fichier GPX <span aria-hidden="true">+</span></strong><small>Jusqu’à 2 Mo · 20 000 points</small><input disabled id="gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml"></label>
         <p class="privacy">Votre trace reste dans ce navigateur. Aucun envoi, aucun compte.</p>
         <p id="error" class="error" role="alert" hidden></p>
-        <p id="file-status" class="file-status" aria-live="polite">Tracé fictif de démonstration</p>
-        <button id="demo" class="text-button" type="button">Revenir à l’exemple fictif</button>
+        <p id="file-status" class="file-status" aria-live="polite">Chargement de l’éditeur…</p>
+        <p id="loading-help" class="privacy">Si le chargement persiste, <a href="./index.html">rechargez la page</a>.</p>
+        <button disabled id="demo" class="text-button" type="button">Revenir à l’exemple fictif</button>
         <div class="step"><span>02</span><h2>Votre souvenir</h2></div>
-        <label class="field" for="title">Titre de l’affiche<input id="title" maxlength="64" value="LE CHEMIN PARCOURU" autocomplete="off"></label>
-        <label class="field" for="date">Date <span class="optional">facultative</span><input id="date" type="date" min="1900-01-01" max="2100-12-31"></label>
+        <label class="field" for="title">Titre de l’affiche<input disabled id="title" maxlength="64" value="LE CHEMIN PARCOURU" autocomplete="off"></label>
+        <label class="field" for="date">Date <span class="optional">facultative</span><input disabled id="date" type="date" min="1900-01-01" max="2100-12-31"></label>
         <fieldset><legend>Couleurs</legend><div class="palettes">
-          <label class="palette forest"><input type="radio" name="palette" value="forest" checked><span class="swatch"></span>Forêt</label>
-          <label class="palette midnight"><input type="radio" name="palette" value="midnight"><span class="swatch"></span>Minuit</label>
-          <label class="palette clay"><input type="radio" name="palette" value="clay"><span class="swatch"></span>Argile</label>
+          <label class="palette forest"><input disabled type="radio" name="palette" value="forest" checked><span class="swatch"></span>Forêt</label>
+          <label class="palette midnight"><input disabled type="radio" name="palette" value="midnight"><span class="swatch"></span>Minuit</label>
+          <label class="palette clay"><input disabled type="radio" name="palette" value="clay"><span class="swatch"></span>Argile</label>
         </div></fieldset>
         <div class="step"><span>03</span><h2>Votre affiche</h2></div>
-        <div class="downloads"><button id="png" type="button">Télécharger le PNG <span>↓</span></button><button id="svg" class="secondary" type="button">Télécharger le SVG <span>↓</span></button></div>
+        <div class="downloads"><button disabled id="png" type="button">Télécharger le PNG <span>↓</span></button><button disabled id="svg" class="secondary" type="button">Télécharger le SVG <span>↓</span></button></div>
         <p class="export-note">Format 30 × 40 cm · PNG 3 543 × 4 724 px<br>SVG vectoriel pour ajuster la création.</p>
         <p id="download-status" class="file-status" aria-live="polite"></p>
       </section>
