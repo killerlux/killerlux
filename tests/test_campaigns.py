@@ -1,4 +1,5 @@
 """Campaign journeys and truthful local aggregate measurements, without external traffic."""
+import base64
 import json
 import struct
 import tempfile
@@ -42,9 +43,11 @@ class CampaignTests(unittest.TestCase):
         self.page = self.browser.new_page(viewport={'width':1440, 'height':1000})
         self.errors = []
         self.external_requests = []
+        self.mocked_external_urls = set()
         self.page.on('pageerror', lambda error:self.errors.append(str(error)))
         self.page.on('request', lambda request:self.external_requests.append(request.url)
-                     if not request.url.startswith((self.base+'/', 'blob:', 'data:')) else None)
+                     if not request.url.startswith((self.base+'/', 'blob:', 'data:'))
+                     and request.url not in self.mocked_external_urls else None)
 
     def tearDown(self):
         self.assertEqual(self.errors, [])
@@ -117,6 +120,65 @@ class CampaignTests(unittest.TestCase):
                     labels = [element.text or '' for element in svg.iter() if element.tag.endswith('text') and float(element.attrib.get('font-size',0)) >= 22]
                     self.assertTrue(any('fictif' in label.lower() for label in labels), campaign['id'])
                     self.assertIn('impression non proposée', ''.join(svg.itertext()).lower())
+
+    def test_repository_image_redirect_is_allowed_without_opening_script_sources(self):
+        image_path='/campaigns/assets/trace-souvenir-feed.png'
+        redirected_url='https://raw.githubusercontent.com/killerlux/killerlux/mock'+image_path
+        png=(ROOT/image_path.lstrip('/')).read_bytes()
+        fulfilled=[]
+        self.mocked_external_urls.add(redirected_url)
+        # Playwright route handlers may skip subsequent redirect hops. CDP
+        # intercepts every hop before transport; all non-local destinations
+        # except the exact mocked repository image are explicitly denied.
+        session=self.page.context.new_cdp_session(self.page)
+        def intercept(event):
+            request_id=event['requestId']
+            url=event['request']['url']
+            if url==self.base+image_path:
+                session.send('Fetch.fulfillRequest',{'requestId':request_id,'responseCode':302,
+                    'responseHeaders':[{'name':'Location','value':redirected_url},
+                                       {'name':'Cache-Control','value':'no-store'}],'body':''})
+            elif url==redirected_url:
+                fulfilled.append(url)
+                session.send('Fetch.fulfillRequest',{'requestId':request_id,'responseCode':200,
+                    'responseHeaders':[{'name':'Content-Type','value':'image/png'},
+                                       {'name':'Access-Control-Allow-Origin','value':'*'},
+                                       {'name':'Cache-Control','value':'no-store'}],
+                    'body':base64.b64encode(png).decode('ascii')})
+            elif url.startswith(self.base+'/'):
+                session.send('Fetch.continueRequest',{'requestId':request_id})
+            else:
+                session.send('Fetch.failRequest',{'requestId':request_id,'errorReason':'Aborted'})
+        session.on('Fetch.requestPaused',intercept)
+        session.send('Fetch.enable',{'patterns':[{'urlPattern':'*','requestStage':'Request'}]})
+        self.studio()
+        image=self.page.locator('[data-campaign="trace-souvenir"] img')
+        image.scroll_into_view_if_needed()
+        expect(image).to_have_js_property('naturalWidth',1080)
+        expect(image).to_have_js_property('naturalHeight',1350)
+        self.assertEqual(fulfilled,[redirected_url])
+        original_url=self.page.url
+        with self.page.expect_download() as received:
+            self.page.locator('[data-campaign="trace-souvenir"] .asset-links').get_by_role('link',name='PNG 4:5',exact=True).click()
+        download=received.value
+        self.assertEqual(download.suggested_filename,'trace-souvenir-feed.png')
+        self.assertTrue(download.url.startswith('blob:'))
+        with tempfile.TemporaryDirectory() as directory:
+            target=Path(directory)/download.suggested_filename
+            download.save_as(target)
+            self.assertEqual(target.read_bytes(),png)
+        self.assertEqual(self.page.url,original_url)
+        self.assertEqual(fulfilled,[redirected_url,redirected_url])
+        expect(self.page.locator('[data-campaign="trace-souvenir"] .copy-status')).to_contain_text('Fichier préparé')
+        content=self.page.locator('meta[http-equiv="Content-Security-Policy"]').get_attribute('content')
+        directives=[part.strip().split() for part in content.split(';') if part.strip()]
+        self.assertEqual(len(directives),len({part[0] for part in directives}))
+        policy={part[0]:part[1:] for part in directives}
+        self.assertEqual(set(policy['img-src']),{"'self'",'data:',
+                                                 'https://raw.githubusercontent.com/killerlux/killerlux/'})
+        self.assertEqual(set(policy['connect-src']),{"'self'",
+                                                     'https://raw.githubusercontent.com/killerlux/killerlux/'})
+        self.assertEqual(policy['script-src'],["'self'"])
 
     def test_all_six_discovery_pages_reach_the_correct_application_section(self):
         anchors = {'dossier-marge':'economics','dossier-preuves':'sources','dossier-comparaison':'compare'}

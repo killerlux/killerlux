@@ -1,16 +1,17 @@
-import {el,loadCampaigns,campaignURL,copyText} from './shared.js';
+import {el,loadCampaigns,campaignURL,copyText,downloadAsset} from './shared.js';
 import {parseMeasurements} from './measurement.js';
 const $=id=>document.getElementById(id);
 let catalog=[];
 const priorities={first:'À tester en premier',second:'Alternative',reserve:'En réserve'};
+function assetLink(c,format,extension,label,status){const filename=`${c.id}-${format}.${extension}`,path='./assets/'+filename;return el('a',{href:path,download:filename,onclick:event=>{event.preventDefault();downloadAsset(path,filename,status);}},label);}
 function renderCatalog(filter='all'){
   const selected=catalog.filter(c=>filter==='all'||c.project===filter);
   $('campaign-list').replaceChildren(...selected.map(c=>{
     const status=el('p',{class:'copy-status',role:'status'});
     const copy=[c.name,'',c.primaryText,'',c.shortHeadline,'CTA : '+c.cta,'Destination de démonstration : '+campaignURL(c)].join('\n');
     const preview=el('a',{href:campaignURL(c),'aria-label':'Voir la page '+c.name},el('img',{class:'campaign-preview',src:`./assets/${c.id}-feed.png`,alt:`${c.headline} ${c.subheadline} ${c.disclosure}`,width:1080,height:1350,loading:'lazy'}));
-    const formats=el('div',{class:'asset-links'},...['feed','story'].map(format=>el('a',{href:`./assets/${c.id}-${format}.png`,download:`${c.id}-${format}.png`},format==='feed'?'PNG 4:5':'PNG 9:16')),el('a',{href:`./assets/${c.id}-feed.svg`,download:`${c.id}-feed.svg`},'SVG modifiable'));
-    if(c.priority==='first')formats.append(el('a',{href:`./assets/${c.id}-story.mp4`,download:`${c.id}-story.mp4`},'Vidéo 15 s'));
+    const formats=el('div',{class:'asset-links'},...['feed','story'].map(format=>assetLink(c,format,'png',format==='feed'?'PNG 4:5':'PNG 9:16',status)),assetLink(c,'feed','svg','SVG modifiable',status));
+    if(c.priority==='first')formats.append(assetLink(c,'story','mp4','Vidéo 15 s',status));
     return el('article',{class:'campaign-card','data-campaign':c.id},preview,el('div',{class:'campaign-body'},el('span',{class:'tag '+c.priority},priorities[c.priority]),el('h3',{},c.name),el('p',{},c.angle),el('div',{class:'actions'},el('a',{class:'button primary',href:campaignURL(c)},'Voir la page →'),el('button',{class:'button',type:'button',onclick:()=>copyText(copy,status)},'Copier les textes')),formats,status,c.priority==='first'?el('details',{},el('summary',{},'Voir la vidéo de 15 secondes'),el('video',{class:'campaign-video',controls:'',preload:'none',playsinline:'',poster:`./assets/${c.id}-story.png`,src:`./assets/${c.id}-story.mp4`,'aria-label':'Vidéo de démonstration : '+c.name}),el('p',{},'Montage de captures réelles · sans audio · textes français intégrés.')):null,el('details',{},el('summary',{},'Texte de la publicité'),el('p',{},c.primaryText),el('p',{},el('strong',{},c.shortHeadline)),el('p',{},'Bouton proposé : '+c.cta)),el('details',{},el('summary',{},'Pourquoi cet angle ?'),el('p',{},c.rationale),el('ul',{},c.risks.map(r=>el('li',{},r))))));
   }));
   $('catalog-status').textContent=selected.length+' concepts disponibles · aucune diffusion ni performance observée.';
