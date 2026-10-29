@@ -1,0 +1,390 @@
+[
+  {
+    "id": "crochet",
+    "name": "Sac de rangement pour crochet nomade",
+    "category": "Dropshipping d'accessoire de loisir",
+    "summary": "Le rangement, le transport et les passages de fil existent déjà chez des spécialistes. Aucun fournisseur livré en France n'est qualifié.",
+    "decision": "hold",
+    "blockers": [
+      "Prix fournisseur, port France, variantes et quantité minimale non vérifiés.",
+      "Origine d'expédition et intégration automatique non établies.",
+      "Un concurrent propose déjà poches et quatre œillets à 29 € hors comparaison du port.",
+      "Aucune qualité constatée ni demande rentable démontrée."
+    ],
+    "supplier": {
+      "name": "Alibaba — référence de sac de crochet",
+      "label": "Piste de fournisseur non qualifiée ; conditions commerciales non vérifiées",
+      "sku": "1601482067525",
+      "productCost": null,
+      "shippingCost": null,
+      "currency": null,
+      "costBasis": "unknown",
+      "fulfillmentOrigin": "Non vérifiée",
+      "personalizationAutomation": "unknown",
+      "sourceIds": [
+        "crochet-alibaba"
+      ]
+    },
+    "competitors": [
+      {
+        "name": "Atelier de la création",
+        "sku": "103050 — sac 26 × 23 × 14 cm",
+        "price": 29,
+        "currency": "EUR",
+        "shippingIncluded": false,
+        "available": null,
+        "sourceIds": [
+          "crochet-atelier"
+        ]
+      },
+      {
+        "name": "Les Ciseaux Magiques",
+        "sku": "MR46980-00440 — Sac à Tricot Notions",
+        "price": 31.3,
+        "currency": "EUR",
+        "shippingIncluded": false,
+        "available": true,
+        "sourceIds": [
+          "crochet-notions"
+        ]
+      },
+      {
+        "name": "Bergère de France",
+        "sku": "91072 — Sac tricot Tartan bleu 45 × 22 cm",
+        "price": 36,
+        "currency": "EUR",
+        "shippingIncluded": false,
+        "available": false,
+        "sourceIds": [
+          "crochet-bergere"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "crochet-alibaba",
+        "label": "Référence fournisseur repérée, non qualifiée",
+        "url": "https://www.alibaba.com/product-detail/Dropshipping-Shopify-Knitting-Ba-Large-Capacity_1601482067525.html",
+        "checkedAt": "2026-10-29",
+        "fact": "Référence repérée ; prix, port, origine, quantité minimale et intégration non vérifiés dans la page reçue."
+      },
+      {
+        "id": "crochet-atelier",
+        "label": "Offre publique concurrente — Atelier",
+        "url": "https://www.atelierdelacreation.com/rangement-tricot-crochet/103050-sac-rangement-tricot-crochet-projets.html",
+        "checkedAt": "2026-10-29",
+        "fact": "Sac 103050 affiché à 29 €, avec quatre œillets et plusieurs poches. Port offert dès 59 € ; stock par coloris non confirmé."
+      },
+      {
+        "id": "crochet-notions",
+        "label": "Offre publique concurrente — Notions",
+        "url": "https://lesciseauxmagiques.fr/sac-a-tricot/sac-a-tricot-notions-4885.html",
+        "checkedAt": "2026-10-29",
+        "fact": "Notions affiché à 31,30 € TTC ; quatre unités en stock lors de la consultation. Passage du fil ; port offert dès 60 €."
+      },
+      {
+        "id": "crochet-bergere",
+        "label": "Repère concurrent épuisé — Bergère de France",
+        "url": "https://www.bergeredefrance.fr/sac-tricot-tartan-bleu-45-x-22cm.html",
+        "checkedAt": "2026-10-29",
+        "fact": "Référence 91072 affichée à 36 €, mais épuisée lors de la consultation ; format 45 × 22 cm."
+      }
+    ],
+    "scenario": {
+      "salePrice": 39,
+      "cost": null,
+      "costIsVerified": false,
+      "vatRate": 20
+    }
+  },
+  {
+    "id": "poster-gpx",
+    "name": "Affiche A3 d'un parcours GPX personnel",
+    "category": "Impression à la demande personnalisée",
+    "summary": "Le coût d'impression d'un fichier prêt et son port France sont publics. La personnalisation TPOP documentée demande une intervention humaine.",
+    "decision": "hold",
+    "blockers": [
+      "Le vendeur doit modifier le visuel puis envoyer la commande personnalisée en production.",
+      "Le prix livré vérifié concerne l'impression d'un fichier prêt ; il n'inclut pas notre génération ni notre contrôle du fichier.",
+      "Les générateurs GPX et l'impression française existent déjà chez plusieurs concurrents.",
+      "Qualité, chaîne de paiement complète et acquisition rentable non validées."
+    ],
+    "supplier": {
+      "name": "TPOP",
+      "label": "Coût catalogue et port France vérifiés ; personnalisation automatique non qualifiée",
+      "sku": "Poster Vertical — mat A3, 29,7 × 42 cm",
+      "productCost": 8,
+      "shippingCost": 3.95,
+      "currency": "EUR",
+      "costBasis": "HT",
+      "fulfillmentOrigin": "France",
+      "personalizationAutomation": "manual",
+      "sourceIds": [
+        "poster-tpop-product",
+        "poster-tpop-shipping",
+        "poster-tpop-personalization",
+        "poster-tpop-payment"
+      ]
+    },
+    "competitors": [
+      {
+        "name": "Your Golden Run",
+        "sku": "Impression papier A4 sans cadre — prix à partir de",
+        "price": 25,
+        "currency": "EUR",
+        "shippingIncluded": false,
+        "available": null,
+        "sourceIds": [
+          "poster-goldenrun"
+        ]
+      },
+      {
+        "name": "Track To Print",
+        "sku": "Affiche Course A4 — prix à partir de",
+        "price": 29.9,
+        "currency": "EUR",
+        "shippingIncluded": true,
+        "available": null,
+        "sourceIds": [
+          "poster-tracktoprint"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "poster-tpop-product",
+        "label": "Catalogue fournisseur — TPOP A3 mat",
+        "url": "https://www.tpop.com/products/vertical-poster-premium",
+        "checkedAt": "2026-10-29",
+        "fact": "Poster mat A3 à 8 € HT, impression incluse ; papier 250 g/m². Port France affiché à 3,95 € HT."
+      },
+      {
+        "id": "poster-tpop-shipping",
+        "label": "Port et origine — TPOP",
+        "url": "https://www.tpop.com/shipping",
+        "checkedAt": "2026-10-29",
+        "fact": "Expédition depuis la France ; premier poster 3,95 € HT France, 4,50 € HT UE. Délais annoncés indicatifs."
+      },
+      {
+        "id": "poster-tpop-personalization",
+        "label": "Procédure de personnalisation — TPOP",
+        "url": "https://help.tpop.com/impression-a-la-demande/les-produits-a-la-demande/comment-rendre-un-produit-personnalisable",
+        "checkedAt": "2026-10-29",
+        "fact": "La commande attend la personnalisation : le vendeur remplace le visuel ou ajoute le texte, puis l'envoie en production."
+      },
+      {
+        "id": "poster-tpop-payment",
+        "label": "Paiement fournisseur — TPOP",
+        "url": "https://help.tpop.com/impression-a-la-demande/facturation-paiement-de-vos-commandes/moyens-de-paiement",
+        "checkedAt": "2026-10-29",
+        "fact": "TPOP facture le vendeur par carte bancaire ou portefeuille préalimenté. Le paiement client ne supprime pas l'avance éventuelle."
+      },
+      {
+        "id": "poster-goldenrun",
+        "label": "Offre publique concurrente — Your Golden Run",
+        "url": "https://yourgoldenrun.com/",
+        "checkedAt": "2026-10-29",
+        "fact": "GPX personnalisable ; papier A4 sans cadre dès 25 €, PDF 10 €. Livraison offerte dès 50 €."
+      },
+      {
+        "id": "poster-tracktoprint",
+        "label": "Offre publique concurrente — Track To Print",
+        "url": "https://tracktoprint.com/fr/lauf-poster",
+        "checkedAt": "2026-10-29",
+        "fact": "Affiche Course imprimée dès 29,90 € en A4, livraison gratuite annoncée ; PDF 16,90 €. Import GPX et aperçu."
+      }
+    ],
+    "scenario": {
+      "salePrice": 34.9,
+      "cost": 11.95,
+      "costIsVerified": true,
+      "vatRate": 20
+    }
+  },
+  {
+    "id": "keytag",
+    "name": "Porte-clé gravé pour petit hébergement",
+    "category": "Gravure à la demande",
+    "summary": "Une référence fabriquée à Lille possède un prix unitaire public. Port, délai du produit et intégration dropshipping restent inconnus.",
+    "decision": "hold",
+    "blockers": [
+      "Fabricant vendant en direct ; aucune API ou intégration dropshipping publique vérifiée.",
+      "Port France et délai de cette référence non établis.",
+      "Dimensions exactes et option de gravure à confirmer dans le configurateur.",
+      "Petit panier unitaire et alternatives concurrentes ; acquisition rentable non démontrée."
+    ],
+    "supplier": {
+      "name": "Lacier",
+      "label": "Offre publique du fabricant ; partenariat dropshipping non qualifié",
+      "sku": "932 — Porte clés aluminium noir diam32, recto",
+      "productCost": 7.42,
+      "shippingCost": null,
+      "currency": "EUR",
+      "costBasis": "HT",
+      "fulfillmentOrigin": "Lille, France, annoncé par le fabricant",
+      "personalizationAutomation": "unknown",
+      "sourceIds": [
+        "keytag-lacier"
+      ]
+    },
+    "competitors": [
+      {
+        "name": "PPCASHOP",
+        "sku": "PCLES — porte-clés hôtel aluminium recto-verso ; produit différent",
+        "price": 34.8,
+        "currency": "EUR",
+        "shippingIncluded": null,
+        "available": null,
+        "sourceIds": [
+          "keytag-ppca"
+        ]
+      },
+      {
+        "name": "CadeauGravure",
+        "sku": "Porte-clés personnalisable texte/photo ; usage cadeau",
+        "price": 10.9,
+        "currency": "EUR",
+        "shippingIncluded": false,
+        "available": null,
+        "sourceIds": [
+          "keytag-cadeaugravure"
+        ]
+      },
+      {
+        "name": "YourSurprise",
+        "sku": "Porte-clé cuir marron raffiné, 10,5 × 2 cm",
+        "price": 14.99,
+        "currency": "EUR",
+        "shippingIncluded": false,
+        "available": true,
+        "sourceIds": [
+          "keytag-yoursurprise"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "keytag-lacier",
+        "label": "Offre publique fabricant — Lacier",
+        "url": "https://www.lacier.fr/932-201747-porte-cles-aluminium-noir-diam32mm.html",
+        "checkedAt": "2026-10-29",
+        "fact": "Option affichée à 7,42 € HT ; fabrication à Lille annoncée. Port et automatisation fournisseur non vérifiés."
+      },
+      {
+        "id": "keytag-ppca",
+        "label": "Offre publique concurrente — PPCASHOP",
+        "url": "https://www.ppcashop.fr/porte-cles-hotel.html",
+        "checkedAt": "2026-10-29",
+        "fact": "PCLES hôtel recto-verso : 29 € HT, soit 34,80 € TTC. BAT avant fabrication ; format/prestation différents de Lacier."
+      },
+      {
+        "id": "keytag-cadeaugravure",
+        "label": "Offre publique concurrente — CadeauGravure",
+        "url": "https://www.cadeaugravure.fr/produit/porte-cles-personnalisable/",
+        "checkedAt": "2026-10-29",
+        "fact": "Texte/photo : 10,90 € + 2,90 € de courrier suivi France, soit 13,80 € affichés livrés ; réalisation annoncée en un jour ouvré."
+      },
+      {
+        "id": "keytag-yoursurprise",
+        "label": "Offre publique concurrente — YourSurprise",
+        "url": "https://www.yoursurprise.fr/porte-cle-personnalise/porte-cles-cuir-personnalise",
+        "checkedAt": "2026-10-29",
+        "fact": "Cuir marron 10,5 × 2 cm à 14,99 €, en stock lors de la consultation ; texte gravé, fabrication en Hollande annoncée."
+      }
+    ],
+    "scenario": {
+      "salePrice": 19.9,
+      "cost": null,
+      "costIsVerified": false,
+      "vatRate": 20
+    }
+  },
+  {
+    "id": "puzzle-gpx",
+    "name": "Puzzle de parcours sportif, 500 pièces",
+    "category": "Puzzle personnalisé à la demande",
+    "summary": "Une référence avec API existe, mais sa fabrication est britannique et son coût livré exact est inconnu. Deux concurrents couvrent déjà le besoin.",
+    "decision": "hold",
+    "blockers": [
+      "Production fournisseur au Royaume-Uni, pas dans l'Union européenne.",
+      "Prix exact du 500 pièces et port France non publics dans les pages consultées.",
+      "Le prix d'appel de la gamme ne doit pas servir de coût du 500 pièces.",
+      "Concurrents directs en cartographie et GPX ; aucune demande rentable démontrée."
+    ],
+    "supplier": {
+      "name": "Prodigi",
+      "label": "Référence et API documentées ; filière UE et coût livré non qualifiés",
+      "sku": "JIGSAW-PUZZLE-500 — 530 × 390 mm",
+      "productCost": null,
+      "shippingCost": null,
+      "currency": "GBP",
+      "costBasis": "HT",
+      "fulfillmentOrigin": "Royaume-Uni",
+      "personalizationAutomation": "documented",
+      "sourceIds": [
+        "puzzle-prodigi",
+        "puzzle-prodigi-prices"
+      ]
+    },
+    "competitors": [
+      {
+        "name": "Ravensburger",
+        "sku": "My MAPuzzle 500, article 80666 — prix promotionnel observé",
+        "price": 18.67,
+        "currency": "EUR",
+        "shippingIncluded": null,
+        "available": true,
+        "sourceIds": [
+          "puzzle-ravensburger"
+        ]
+      },
+      {
+        "name": "The Post Trace",
+        "sku": "Puzzle Sportif Personnalisée — 500 pièces, trace GPX",
+        "price": 35,
+        "currency": "EUR",
+        "shippingIncluded": false,
+        "available": null,
+        "sourceIds": [
+          "puzzle-posttrace"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "puzzle-prodigi",
+        "label": "Catalogue fournisseur — Prodigi",
+        "url": "https://www.prodigi.com/products/sport-and-games/jigsaw-puzzles/",
+        "checkedAt": "2026-10-29",
+        "fact": "JIGSAW-PUZZLE-500, 530 × 390 mm, fabrication UK ; Print API documentée. Prix d'appel £10 : pas le prix 500 pièces confirmé."
+      },
+      {
+        "id": "puzzle-prodigi-prices",
+        "label": "Accès au tarif livré — Prodigi",
+        "url": "https://support.prodigi.com/hc/en-us/articles/13159121454364-Where-can-I-find-a-full-list-of-Prodigi-prices",
+        "checkedAt": "2026-10-29",
+        "fact": "Les prix exacts par produit et destination se consultent dans le tableau de bord. Aucun compte créé pour cette étude."
+      },
+      {
+        "id": "puzzle-ravensburger",
+        "label": "Offre publique concurrente — Ravensburger",
+        "url": "https://www.ravensburger.fr/fr-FR/produits/personnaliser/puzzle-personnalise/my-mapuzzle-500-pices-dans-une-bote-cartonne-80666",
+        "checkedAt": "2026-10-29",
+        "fact": "Carte personnalisée 500 pièces : promotion observée 18,67 €, prix barré 24,90 € ; en stock. Port personnalisé non confirmé."
+      },
+      {
+        "id": "puzzle-posttrace",
+        "label": "Offre publique concurrente — The Post Trace",
+        "url": "https://thepostrace.com/la-galerie/puzzle-sportifs/puzzle-sportif-personnalisee/",
+        "checkedAt": "2026-10-29",
+        "fact": "Puzzle GPX 500 pièces : 35 € ; fabrication France revendiquée et prévisualisation avant production. Port offert dès 50 € en relais."
+      }
+    ],
+    "scenario": {
+      "salePrice": 39,
+      "cost": null,
+      "costIsVerified": false,
+      "vatRate": 20
+    }
+  }
+]

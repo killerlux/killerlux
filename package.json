@@ -1,0 +1,8 @@
+{
+  "name": "commerce-evidence-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "An open research tool for comparing product evidence and conditional business scenarios.",
+  "scripts": { "test": "node --test tests/*.test.js tests/*.test.mjs src/*.test.mjs", "test:browser": "python tests/test_extract.py && python tests/test_app.py" }
+}
