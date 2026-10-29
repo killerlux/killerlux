@@ -31,7 +31,7 @@ L'hébergement de démonstration peut présenter une confirmation d'accès. Une 
 
 ## Fonctionnement
 
-Application statique, JavaScript natif, sans dépendance d'exécution, sans backend, sans compte et sans suivi applicatif. Le seul chargement de données est le fichier de recherche statique `data/cases.json` du même site. Les documents et paramètres importés restent dans le navigateur ; rien n'est sauvegardé automatiquement.
+Application statique, JavaScript natif, sans dépendance d'exécution, sans backend, sans compte et sans suivi applicatif. Les données de recherche et de campagne viennent des fichiers statiques `data/cases.json` et `campaigns/campaigns.json` du même site. Les documents et paramètres importés restent dans le navigateur ; rien n'est sauvegardé automatiquement.
 
 Le nom « probabilité » désigne ici un résultat **conditionnel au modèle et aux entrées déclarées**, pas une chance de réussite intrinsèque du produit. Sans observations pertinentes, aucun résultat étayé n'est calculé. En mode hypothétique, tous les pourcentages restent des conséquences des hypothèses choisies.
 
@@ -88,3 +88,5 @@ Cette version est un outil gratuit de recherche et d'apprentissage. Elle ne cont
 Les imports utilisateurs ne sont jamais enregistrés dans le dépôt. L'hébergeur peut conserver ses propres journaux techniques. Les noms de marques mentionnés servent uniquement à citer les sources, sans affiliation revendiquée.
 
 Les fichiers peuvent être servis tels quels par un hébergement statique HTTPS ; aucune étape de build n'est requise en production. Les SVG/PNG et MP4 déjà présents sont les actifs à publier. Les scripts de génération et les tests servent au développement. Le fichier `_headers` fournit des en-têtes pour les hébergeurs qui reconnaissent ce format ; les politiques CSP des pages restent présentes même lorsqu'il est ignoré.
+
+Sur l’hébergement de démonstration, certaines images et vidéos sont redirigées vers les fichiers du dépôt public GitHub. Les CSP du studio et des pages de découverte autorisent ce seul dépôt comme origine supplémentaire de médias ; les scripts externes restent interdits. Aucun document importé ni paramètre de calcul n’est envoyé à cette origine.
